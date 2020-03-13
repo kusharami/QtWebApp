@@ -5,13 +5,8 @@
 #include <QtGlobal>
 #include <QVariant>
 
-#define QTWEBAPP_MAJOR @qtwebapp_MAJOR@
-#define QTWEBAPP_MINOR @qtwebapp_MINOR@
-#define QTWEBAPP_PATCH @qtwebapp_PATCH@
-#define QTWEBAPP_VERSION_STR "@qtwebapp_VERSION@"
-
 #if defined _WIN32 || defined __CYGWIN__
-#  ifdef CMAKE_QTWEBAPP_SO
+#  if defined(CMAKE_QTWEBAPP_SO) || defined(QTWEBAPPLIB_EXPORT)
 #    ifdef __GNUC__
 #      define QTWEBAPP_EXPORT __attribute__((dllexport))
 #    else // __GNUC__
@@ -37,6 +32,10 @@ namespace qtwebapp {
 
 /// The version of QtWebApp.
 QTWEBAPP_EXPORT const char* getQtWebAppLibVersion();
+QTWEBAPP_EXPORT int getQtWebAppLibVersionMajor();
+QTWEBAPP_EXPORT int getQtWebAppLibVersionMinor();
+QTWEBAPP_EXPORT int getQtWebAppLibVersionPatch();
+QTWEBAPP_EXPORT int getQtWebAppLibVersionNumber();
 
 /// Parses the given number by respecting its suffix.
 QTWEBAPP_EXPORT int parseNum(const QVariant &v, int base = 1e3);

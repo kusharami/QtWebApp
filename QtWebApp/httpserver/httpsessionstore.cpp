@@ -102,7 +102,7 @@ void HttpSessionStore::sessionTimerEvent()
         ++i;
         HttpSession session=prev.value();
         qint64 lastAccess=session.getLastAccess();
-        if (now-lastAccess>cfg.expirationTime)
+        if (now-lastAccess>qint64(cfg.expirationTime))
         {
             qDebug("HttpSessionStore: session %s expired",session.getId().data());
             sessions.erase(prev);
