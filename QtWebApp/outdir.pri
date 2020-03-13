@@ -16,7 +16,10 @@ isEmpty(QTWEBAPP_BIN) {
     else:gcc:QTWEBAPP_BIN = $$QTWEBAPP_BIN-gcc
 
     QTWEBAPP_BIN = $$QTWEBAPP_BIN-$$QT_ARCH
-    CONFIG(debug, debug|release) {
-        QTWEBAPP_BIN = $$QTWEBAPP_BIN/debug
-    }
+}
+
+!isEmpty(QTWEBAPP_STATIC):QTWEBAPP_BIN = $$QTWEBAPP_BIN-static
+
+CONFIG(debug, debug|release) {
+    QTWEBAPP_BIN = $$QTWEBAPP_BIN-debug
 }
