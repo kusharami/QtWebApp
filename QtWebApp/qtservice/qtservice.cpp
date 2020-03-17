@@ -622,7 +622,18 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
 
     \sa exec(), start(), QtServiceController::install()
 */
-QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
+
+static QStringList makeArguments(int argc, char **argv)
+{
+    QStringList result;
+    result.reserve(argc);
+    for (int i = 0; i < argc; ++i)
+        result.append(QString::fromLocal8Bit(argv[i]));
+
+    return result;
+}
+
+QtServiceBase::QtServiceBase(const QStringList &arguments, const QString &name)
 {
 #if defined(QTSERVICE_DEBUG)
     qInstallMsgHandler(qtServiceLogDebug);
@@ -647,8 +658,12 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
 
     d_ptr->serviceFlags = 0;
     d_ptr->sysd = 0;
-    for (int i = 0; i < argc; ++i)
-        d_ptr->args.append(QString::fromLocal8Bit(argv[i]));
+    d_ptr->args = arguments;
+}
+
+QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
+    : QtServiceBase(makeArguments(argc, argv), name)
+{
 }
 
 /*!

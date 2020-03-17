@@ -120,6 +120,7 @@ public:
 
     Q_DECLARE_FLAGS(ServiceFlags, ServiceFlag)
 
+    QtServiceBase(const QStringList &arguments, const QString &name);
     QtServiceBase(int argc, char **argv, const QString &name);
     virtual ~QtServiceBase();
 
@@ -163,6 +164,9 @@ template <typename Application>
 class QtService : public QtServiceBase
 {
 public:
+    QtService(const QStringList &arguments, const QString &name)
+        : QtServiceBase(arguments, name), app(0)
+    {  }
     QtService(int argc, char **argv, const QString &name)
         : QtServiceBase(argc, argv, name), app(0)
     {  }
