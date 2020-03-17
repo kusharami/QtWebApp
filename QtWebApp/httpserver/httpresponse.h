@@ -49,8 +49,8 @@ public:
 	  @param name name of the header
 	  @param value value of the header
 	*/
-	void setHeader(const QByteArray name, const QByteArray value);
-	
+	void setHeader(const QByteArray &name, const QByteArray &value);
+
 	/**
 	  Set a HTTP response header.
 	  You must call this method before the first write().
@@ -69,11 +69,11 @@ public:
 	  Set status code and description. The default is 200,OK.
 	  You must call this method before the first write().
 	*/
-	void setStatus(const int statusCode, const QByteArray description=QByteArray());
-	
+	void setStatus(const int statusCode, const QByteArray &description=QByteArray());
+
 	/** Return the status code. */
 	int getStatusCode() const;
-	
+
 	/**
 	  Write body data to the socket.
 	  <p>
@@ -87,8 +87,9 @@ public:
 	  @param data Data bytes of the body
 	  @param lastPart Indicates that this is the last chunk of data and flushes the output buffer.
 	*/
-	void write(const QByteArray data, const bool lastPart=false);
-	
+	void write(const QByteArray &data, const bool lastPart = false);
+	void write(QIODevice *fromDevice, bool lastPart = false);
+
 	/**
 	  Indicates whether the body has been sent completely (write() has been called with lastPart=true).
 	*/
@@ -119,36 +120,37 @@ public:
 	 * This might be useful to cancel the generation of large or slow responses.
 	 */
 	bool isConnected() const;
-	
+
 private:
-	
+
 	/** Request headers */
 	QMap<QByteArray,QByteArray> headers;
-	
+
 	/** Socket for writing output */
 	QTcpSocket* socket;
-	
+
 	/** HTTP status code*/
 	int statusCode;
-	
+
 	/** HTTP status code description */
 	QByteArray statusText;
-	
+
 	/** Indicator whether headers have been sent */
 	bool sentHeaders;
-	
+
 	/** Indicator whether the body has been sent completely */
 	bool sentLastPart;
-	
+
 	/** Whether the response is sent in chunked mode */
 	bool chunkedMode;
-	
+
 	/** Cookies */
 	QMap<QByteArray,HttpCookie> cookies;
-	
+
 	/** Write raw data to the socket. This method blocks until all bytes have been passed to the TCP buffer */
-	bool writeToSocket(QByteArray data);
-	
+	bool writeToSocket(const QByteArray &data);
+	bool writeToSocket(QIODevice *fromDevice);
+
 	/**
 	  Write the response HTTP status and headers to the socket.
 	  Calling this method is optional, because writeBody() calls

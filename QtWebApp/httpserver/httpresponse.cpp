@@ -17,7 +17,7 @@ HttpResponse::HttpResponse(QTcpSocket *socket)
 	chunkedMode=false;
 }
 
-void HttpResponse::setHeader(QByteArray name, QByteArray value)
+void HttpResponse::setHeader(const QByteArray &name, const QByteArray &value)
 {
 	Q_ASSERT(sentHeaders==false);
 	headers.insert(name,value);
@@ -34,7 +34,7 @@ QMap<QByteArray,QByteArray>& HttpResponse::getHeaders()
 	return headers;
 }
 
-void HttpResponse::setStatus(int statusCode, QByteArray description)
+void HttpResponse::setStatus(int statusCode, const QByteArray &description)
 {
 	this->statusCode=statusCode;
 	statusText=description;
@@ -73,20 +73,20 @@ void HttpResponse::writeHeaders()
 	sentHeaders=true;
 }
 
-bool HttpResponse::writeToSocket(QByteArray data)
+bool HttpResponse::writeToSocket(const QByteArray &data)
 {
 	int remaining=data.size();
-	char* ptr=data.data();
+	const char* ptr=data.data();
 	while (socket->isOpen() && remaining>0)
 	{
 		// If the output buffer has become large, then wait until it has been sent.
-		if (socket->bytesToWrite()>16384)
+		if (socket->bytesToWrite() > 16384)
 		{
 			socket->waitForBytesWritten(-1);
 		}
 		
 		qint64 written=socket->write(ptr,remaining);
-		if (written==-1)
+		if (written == -1)
 		{
 			return false;
 		}
@@ -96,7 +96,34 @@ bool HttpResponse::writeToSocket(QByteArray data)
 	return true;
 }
 
-void HttpResponse::write(QByteArray data, bool lastPart)
+bool HttpResponse::writeToSocket(QIODevice *fromDevice)
+{
+	if (fromDevice->isSequential())
+		return false;
+
+	qint64 remaining = fromDevice->bytesAvailable();
+	while (socket->isOpen() && remaining > 0)
+	{
+		// If the output buffer has become large, then wait until it has been sent.
+		if (socket->bytesToWrite() > 16384)
+		{
+			socket->waitForBytesWritten(-1);
+		}
+
+		auto data = fromDevice->read(16384);
+		qint64 written = socket->write(data);
+		if (written < 0)
+		{
+			return false;
+		}
+		if (data.size() == 0)
+			break;
+		remaining -= written;
+	}
+	return true;
+}
+
+void HttpResponse::write(const QByteArray &data, bool lastPart)
 {
 	Q_ASSERT(sentLastPart==false);
 	
@@ -145,7 +172,73 @@ void HttpResponse::write(QByteArray data, bool lastPart)
 			writeToSocket(data);
 		}
 	}
-	
+
+	// Only for the last chunk, send the terminating marker and flush the buffer.
+	if (lastPart)
+	{
+		if (chunkedMode)
+		{
+			writeToSocket("0\r\n\r\n");
+		}
+		socket->flush();
+		sentLastPart=true;
+	}
+}
+
+void HttpResponse::write(QIODevice *fromDevice, bool lastPart)
+{
+	Q_ASSERT(sentLastPart==false);
+	Q_ASSERT(fromDevice);
+	Q_ASSERT(!fromDevice->isSequential());
+
+	qint64 remaining = fromDevice->bytesAvailable();
+
+	// Send HTTP headers, if not already done (that happens only on the first call to write())
+	if (sentHeaders==false)
+	{
+		// If the whole response is generated with a single call to write(), then we know the total
+		// size of the response and therefore can set the Content-Length header automatically.
+		if (lastPart)
+		{
+			// Automatically set the Content-Length header
+			headers.insert("Content-Length",QByteArray::number(remaining));
+		}
+
+		// else if we will not close the connection at the end, them we must use the chunked mode.
+		else
+		{
+			QByteArray connectionValue=headers.value("Connection",headers.value("connection"));
+			bool connectionClose=QString::compare(connectionValue,"close",Qt::CaseInsensitive)==0;
+			if (!connectionClose)
+			{
+				headers.insert("Transfer-Encoding","chunked");
+				chunkedMode=true;
+			}
+		}
+
+		writeHeaders();
+	}
+
+	// Send data
+	if (remaining > 0)
+	{
+		if (chunkedMode)
+		{
+			if (remaining > 0)
+			{
+				QByteArray size=QByteArray::number(remaining,16);
+				writeToSocket(size);
+				writeToSocket("\r\n");
+				writeToSocket(fromDevice);
+				writeToSocket("\r\n");
+			}
+		}
+		else
+		{
+			writeToSocket(fromDevice);
+		}
+	}
+
 	// Only for the last chunk, send the terminating marker and flush the buffer.
 	if (lastPart)
 	{
