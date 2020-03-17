@@ -34,27 +34,18 @@ HttpConnectionHandler::HttpConnectionHandler(const HttpServerConfig &cfg, HttpRe
 	connect(socket, SIGNAL(readyRead()), SLOT(read()));
 	connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
 	connect(&readTimer, SIGNAL(timeout()), SLOT(readTimeout()));
-	connect(thread, SIGNAL(finished()), this, SLOT(thread_done()));
-	
+	connect(thread, &QThread::finished, this, &QObject::deleteLater);
+
 #ifdef CMAKE_DEBUG
 	qDebug("HttpConnectionHandler (%p): constructed", static_cast<void*>(this));
 #endif
 }
 
-void HttpConnectionHandler::thread_done()
+HttpConnectionHandler::~HttpConnectionHandler()
 {
 	readTimer.stop();
 	socket->close();
 	delete socket;
-	qDebug("HttpConnectionHandler (%p): thread stopped", static_cast<void*>(this));
-}
-
-
-HttpConnectionHandler::~HttpConnectionHandler()
-{
-	thread->quit();
-	thread->wait();
-	thread->deleteLater();
 #ifdef CMAKE_DEBUG
 	qDebug("HttpConnectionHandler (%p): destroyed", static_cast<void*>(this));
 #endif
@@ -130,6 +121,15 @@ void HttpConnectionHandler::setBusy()
 	this->busy = true;
 }
 
+void HttpConnectionHandler::destroy()
+{
+	auto thread = this->thread;
+	Q_ASSERT(thread);
+	thread->requestInterruption();
+	thread->quit();
+	thread->wait();
+	delete thread;
+}
 
 void HttpConnectionHandler::readTimeout()
 {

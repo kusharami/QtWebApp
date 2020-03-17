@@ -29,7 +29,7 @@ HttpConnectionHandlerPool::~HttpConnectionHandlerPool()
 	// delete all connection handlers and wait until their threads are closed
 	foreach(HttpConnectionHandler* handler, pool)
 	{
-		delete handler;
+		handler->destroy();
 	}
 	delete sslConfiguration;
 #ifdef CMAKE_DEBUG
@@ -79,7 +79,7 @@ void HttpConnectionHandlerPool::cleanup()
 		{
 			if (++idleCounter > maxIdleHandlers)
 			{
-				delete handler;
+				handler->destroy();
 				pool.removeOne(handler);
 #ifdef CMAKE_DEBUG
 				qDebug("HttpConnectionHandlerPool: Removed connection handler (%p), pool size is now %i",handler,pool.size());

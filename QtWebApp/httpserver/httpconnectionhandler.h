@@ -50,9 +50,13 @@ typedef int tSocketDescriptor;
 class QTWEBAPP_EXPORT HttpConnectionHandler : public QObject {
 	Q_OBJECT
 	Q_DISABLE_COPY(HttpConnectionHandler)
-	
+
+protected:
+	/** Destructor */
+	virtual ~HttpConnectionHandler();
+
 public:
-	
+
 	/**
 	  Constructor.
 	  @param settings Configuration settings of the HTTP webserver
@@ -61,47 +65,47 @@ public:
 	*/
 	HttpConnectionHandler(const HttpServerConfig &cfg, HttpRequestHandler* requestHandler,
 			const QSslConfiguration* sslConfiguration=nullptr);
-	
-	/** Destructor */
-	virtual ~HttpConnectionHandler();
-	
+
+
 	/** Returns true, if this handler is in use. */
 	bool isBusy();
-	
+
 	/** Mark this handler as busy */
 	void setBusy();
-	
+
+	void destroy();
+
 private:
-	
+
 	/** Configuration */
 	HttpServerConfig cfg;
-	
+
 	/** TCP socket of the current connection  */
 	QTcpSocket* socket;
-	
+
 	/** The thread that processes events of this connection *//** The thread that processes events of this connection */
 	QThread* thread;
-	
+
 	/** Time for read timeout detection */
 	QTimer readTimer;
-	
+
 	/** Storage for the current incoming HTTP request */
 	HttpRequest* currentRequest;
-	
+
 	/** Dispatches received requests to services */
 	HttpRequestHandler* requestHandler;
-	
+
 	/** This shows the busy-state from a very early time */
 	bool busy;
-	
+
 	/** Configuration for SSL */
 	const QSslConfiguration* sslConfiguration;
-	
+
 	/**  Create SSL or TCP socket */
 	void createSocket();
-	
+
 public slots:
-	
+
 	/**
 	  Received from from the listener, when the handler shall start processing a new connection.
 	  @param socketDescriptor references the accepted connection.
@@ -118,9 +122,6 @@ private slots:
 	
 	/** Received from the socket when a connection has been closed */
 	void disconnected();
-	
-	/** Cleanup after the thread is closed */
-	void thread_done();
 };
 
 } // end of namespace
