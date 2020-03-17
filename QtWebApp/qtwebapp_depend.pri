@@ -1,3 +1,4 @@
+INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/..
 INCLUDEPATH += $$PWD/qtservice
 
