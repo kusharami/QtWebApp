@@ -14,12 +14,14 @@
 using namespace qtwebapp;
 
 Logger* Logger::defaultLogger=nullptr;
+QtMessageHandler Logger::oldMessageHandler=nullptr;
 
 
 QThreadStorage<QHash<QString,QString>*> Logger::logVars;
 
 
 QMutex Logger::mutex;
+QMutex Logger::handlerMutex;
 
 
 Logger::Logger(QObject* parent)
@@ -50,7 +52,8 @@ void Logger::msgHandler(const QtMsgType type, const QString &message, const QStr
 	// But allow recursive calls, which is required to prevent a deadlock
 	// if the logger itself produces an error message.
 	recursiveMutex.lock();
-	
+
+	handlerMutex.lock();
 	// Fall back to stderr when this method has been called recursively.
 	if (defaultLogger && nonRecursiveMutex.tryLock())
 	{
@@ -62,7 +65,8 @@ void Logger::msgHandler(const QtMsgType type, const QString &message, const QStr
 		fputs(qPrintable(message),stderr);
 		fflush(stderr);
 	}
-	
+	handlerMutex.unlock();
+
 	// Abort the program after logging a fatal message
 	if (type==QtFatalMsg)
 	{
@@ -89,15 +93,7 @@ void Logger::msgHandler4(const QtMsgType type, const char* message)
 
 Logger::~Logger()
 {
-	if (defaultLogger==this)
-	{
-#if QT_VERSION >= 0x050000
-		qInstallMessageHandler(nullptr);
-#else
-		qInstallMsgHandler(nullptr);
-#endif
-		defaultLogger=nullptr;
-	}
+	uninstallMsgHandler();
 }
 
 
@@ -110,12 +106,31 @@ void Logger::write(const LogMessage* logMessage)
 
 void Logger::installMsgHandler()
 {
-	defaultLogger=this;
+	handlerMutex.lock();
+	if (defaultLogger != this) {
+		defaultLogger=this;
 #if QT_VERSION >= 0x050000
-	qInstallMessageHandler(msgHandler5);
+		oldMessageHandler = qInstallMessageHandler(msgHandler5);
 #else
-	qInstallMsgHandler(msgHandler4);
+		oldMessageHandler = qInstallMsgHandler(msgHandler4);
 #endif
+	}
+	handlerMutex.unlock();
+}
+
+void Logger::uninstallMsgHandler()
+{
+	handlerMutex.lock();
+	if (defaultLogger==this)
+	{
+#if QT_VERSION >= 0x050000
+		qInstallMessageHandler(oldMessageHandler);
+#else
+		qInstallMsgHandler(oldMessageHandler);
+#endif
+		defaultLogger=nullptr;
+	}
+	handlerMutex.unlock();
 }
 
 

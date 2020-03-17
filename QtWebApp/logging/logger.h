@@ -99,7 +99,8 @@ public:
 	  can be used through the global static logging functions (e.g. qDebug()).
 	*/
 	void installMsgHandler();
-	
+	void uninstallMsgHandler();
+
 	/**
 	  Sets a thread-local variable that may be used to decorate log messages.
 	  This method is thread safe.
@@ -133,6 +134,8 @@ protected:
 	/** Used to synchronize access of concurrent threads */
 	static QMutex mutex;
 	
+	static QMutex handlerMutex;
+
 	/**
 	  Decorate and write a log message to stderr. Override this method
 	  to provide a different output medium.
@@ -144,6 +147,8 @@ private:
 	/** Pointer to the default logger, used by msgHandler() */
 	static Logger* defaultLogger;
 	
+	static QtMessageHandler oldMessageHandler;
+
 	/**
 	  Message Handler for the global static logging functions (e.g. qDebug()).
 	  Forward calls to the default logger.

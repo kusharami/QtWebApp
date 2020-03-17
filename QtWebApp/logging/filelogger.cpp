@@ -71,6 +71,7 @@ FileLogger::FileLogger(QSettings *settings, const int refreshInterval, QObject* 
 
 FileLogger::~FileLogger()
 {
+	uninstallMsgHandler();
 	close();
 }
 
