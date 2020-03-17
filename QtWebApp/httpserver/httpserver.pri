@@ -16,6 +16,7 @@ HEADERS += \
            $$PWD/httpresponse.h \
            $$PWD/httpcookie.h \
            $$PWD/httprequesthandler.h \
+           $$PWD/httpserverconfig.h \
            $$PWD/httpsession.h \
            $$PWD/httpsessionstore.h \
            $$PWD/staticfilecontroller.h
@@ -27,6 +28,7 @@ SOURCES += \
            $$PWD/httprequest.cpp \
            $$PWD/httpresponse.cpp \
            $$PWD/httpcookie.cpp \
+           $$PWD/httpserverconfig.cpp \
            $$PWD/httpsession.cpp \
            $$PWD/httpsessionstore.cpp \
            $$PWD/staticfilecontroller.cpp
