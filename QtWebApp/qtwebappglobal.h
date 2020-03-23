@@ -5,6 +5,10 @@
 #include <QtGlobal>
 #include <QVariant>
 
+#if defined(QTWEBAPPLIB_STATIC)
+#  define QTWEBAPP_EXPORT
+#  define QTWEBAPP_PRIVATE
+#else
 #if defined _WIN32 || defined __CYGWIN__
 #  if defined(CMAKE_QTWEBAPP_SO) || defined(QTWEBAPPLIB_EXPORT)
 #    ifdef __GNUC__
@@ -26,6 +30,7 @@
 #else
 #  define QTWEBAPP_EXPORT
 #  define QTWEBAPP_PRIVATE
+#endif
 #endif
 
 namespace qtwebapp {

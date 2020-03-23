@@ -49,7 +49,7 @@
 #include <QCoreApplication>
 
 // This is specific to Windows dll's
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WIN) && !defined(QTWEBAPPLIB_STATIC)
     #if defined(QTWEBAPPLIB_EXPORT)
         #define DECLSPEC Q_DECL_EXPORT
     #elif defined(QTWEBAPPLIB_IMPORT)
