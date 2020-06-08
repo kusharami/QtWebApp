@@ -278,7 +278,7 @@ void HttpConnectionHandler::read()
 				readTimer.start(cfg.readTimeout);
 			}
 			delete currentRequest;
-			currentRequest=nullptr;currentRequest=nullptr;
+			currentRequest=nullptr;
 		}
 	}
 }
