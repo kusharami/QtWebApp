@@ -159,6 +159,8 @@ void HttpConnectionHandler::read()
 	// The loop adds support for HTTP pipelinig
 	while (socket->bytesAvailable())
 	{
+		readTimer.stop();
+		
 #ifdef SUPERVERBOSE
 		qDebug("HttpConnectionHandler (%p): read input",static_cast<void*>(this));
 #endif
@@ -173,12 +175,6 @@ void HttpConnectionHandler::read()
 		while (socket->bytesAvailable() && currentRequest->getStatus()!=HttpRequest::complete && currentRequest->getStatus()!=HttpRequest::abort)
 		{
 			currentRequest->readFromSocket(socket);
-			if (currentRequest->getStatus()==HttpRequest::waitForBody)
-			{
-				// Restart timer for read timeout, otherwise it would
-				// expire during large file uploads.
-				readTimer.start(cfg.readTimeout);
-			}
 		}
 		
 		// If the request is aborted, return error message and close the connection
@@ -195,7 +191,6 @@ void HttpConnectionHandler::read()
 		// If the request is complete, let the request mapper dispatch it
 		if (currentRequest->getStatus()==HttpRequest::complete)
 		{
-			readTimer.stop();
 #ifdef CMAKE_DEBUG
 			qDebug("HttpConnectionHandler (%p): received request",static_cast<void*>(this));
 #endif
