@@ -3,7 +3,7 @@ QTWEBAPP_BIN = $$PWD/bin
 
 win32 {
     QTWEBAPP_BIN = $$QTWEBAPP_BIN-win32
-    msvc:QTWEBAPP_BIN = $$QTWEBAPP_BIN-msvc
+    msvc:QTWEBAPP_BIN = $$QTWEBAPP_BIN-msvc$$QMAKE_MSC_VER
 }
 else:macx:QTWEBAPP_BIN = $$QTWEBAPP_BIN-osx
 else:linux:QTWEBAPP_BIN = $$QTWEBAPP_BIN-linux
