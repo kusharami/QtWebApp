@@ -79,22 +79,26 @@ void HttpConnectionHandler::createSocket()
 
 void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 {
+	Q_ASSERT(!busy);
+	Q_ASSERT(!reading);
+	Q_ASSERT(
+		socket->isOpen() == false); // if not, then the handler is already busy
+
+	// delete previous request
+	delete currentRequest;
+	currentRequest = nullptr;
 #ifdef CMAKE_DEBUG
 	qDebug("HttpConnectionHandler (%p): handle new connection",
 		static_cast<void *>(this));
 #endif
-	busy = true;
-	Q_ASSERT(
-		socket->isOpen() == false); // if not, then the handler is already busy
-
 	socket->abort();
-
 	if (!socket->setSocketDescriptor(socketDescriptor))
 	{
 		qCritical("HttpConnectionHandler (%p): cannot initialize socket: %s",
 			static_cast<void *>(this), qPrintable(socket->errorString()));
 		return;
 	}
+	busy = true;
 
 #ifndef QT_NO_SSL
 	// Switch on encryption, if SSL is configured
@@ -110,9 +114,6 @@ void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 
 	// Start timer for read timeout
 	readTimer.start(cfg.readTimeout);
-	// delete previous request
-	delete currentRequest;
-	currentRequest = nullptr;
 }
 
 bool HttpConnectionHandler::isBusy()
