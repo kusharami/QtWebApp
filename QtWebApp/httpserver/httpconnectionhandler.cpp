@@ -85,9 +85,6 @@ void HttpConnectionHandler::handleConnection(tSocketDescriptor socketDescriptor)
 	Q_ASSERT(
 		socket->isOpen() == false); // if not, then the handler is already busy
 
-	//UGLY workaround - we need to clear writebuffer before reusing this socket
-	//https://bugreports.qt-project.org/browse/QTBUG-28914
-	socket->connectToHost("", 0);
 	socket->abort();
 
 	if (!socket->setSocketDescriptor(socketDescriptor))
