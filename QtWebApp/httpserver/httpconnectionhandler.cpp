@@ -260,6 +260,7 @@ void HttpConnectionHandler::read()
 
 			if (!socket->isOpen())
 			{
+				busy = false;
 				disconnect = true;
 			} else
 			{
