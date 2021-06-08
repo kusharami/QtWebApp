@@ -4,7 +4,7 @@
 
 #include <QDir>
 
-#ifndef QT_NO_OPENSSL
+#ifndef QT_NO_SSL
 #include <QSslCertificate>
 #include <QSslConfiguration>
 #include <QSslKey>
@@ -101,7 +101,7 @@ void HttpConnectionHandlerPool::loadSslConfig()
 	QString sslCertFileName = cfg.sslCertFile;
 	if (!sslKeyFileName.isEmpty() && !sslCertFileName.isEmpty())
 	{
-#ifdef QT_NO_OPENSSL
+#ifdef QT_NO_SSL
 		qWarning("HttpConnectionHandlerPool: SSL is not supported");
 #else
 		// Convert relative fileNames to absolute, based on the directory of the config file.
@@ -154,6 +154,6 @@ void HttpConnectionHandlerPool::loadSslConfig()
 #ifdef CMAKE_DEBUG
 		qDebug("HttpConnectionHandlerPool: SSL settings loaded");
 #endif
-#endif // QT_NO_OPENSSL
+#endif // QT_NO_SSL
 	}
 }
