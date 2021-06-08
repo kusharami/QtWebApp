@@ -15,11 +15,11 @@
 #include <QTimer>
 
 #ifndef QT_NO_SSL
-#  include <QSslConfiguration>
+#include <QSslConfiguration>
 #endif
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /** Alias type definition, for compatibility to different Qt versions */
 #if QT_VERSION >= 0x050000
 typedef qintptr tSocketDescriptor;
@@ -29,7 +29,7 @@ typedef int tSocketDescriptor;
 
 /** Alias for QSslConfiguration if OpenSSL is not supported */
 #ifdef QT_NO_SSL
-#  define QSslConfiguration QObject
+#define QSslConfiguration QObject
 #endif
 
 /**
@@ -47,7 +47,8 @@ typedef int tSocketDescriptor;
   The readTimeout value defines the maximum time to wait for a complete HTTP request.
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize.
 */
-class QTWEBAPP_EXPORT HttpConnectionHandler : public QObject {
+class QTWEBAPP_EXPORT HttpConnectionHandler : public QObject
+{
 	Q_OBJECT
 	Q_DISABLE_COPY(HttpConnectionHandler)
 
@@ -56,16 +57,15 @@ protected:
 	virtual ~HttpConnectionHandler();
 
 public:
-
 	/**
 	  Constructor.
 	  @param settings Configuration settings of the HTTP webserver
 	  @param requestHandler Handler that will process each incoming HTTP request
 	  @param sslConfiguration SSL (HTTPS) will be used if not NULL
 	*/
-	HttpConnectionHandler(const HttpServerConfig &cfg, HttpRequestHandler* requestHandler,
-			const QSslConfiguration* sslConfiguration=nullptr);
-
+	HttpConnectionHandler(const HttpServerConfig &cfg,
+		HttpRequestHandler *requestHandler,
+		const QSslConfiguration *sslConfiguration = nullptr);
 
 	/** Returns true, if this handler is in use. */
 	bool isBusy();
@@ -76,30 +76,29 @@ public:
 	void destroy();
 
 private:
-
 	/** Configuration */
 	HttpServerConfig cfg;
 
 	/** TCP socket of the current connection  */
-	QTcpSocket* socket;
+	QTcpSocket *socket;
 
-	/** The thread that processes events of this connection *//** The thread that processes events of this connection */
-	QThread* thread;
+	/** The thread that processes events of this connection */ /** The thread that processes events of this connection */
+	QThread *thread;
 
 	/** Time for read timeout detection */
 	QTimer readTimer;
 
 	/** Storage for the current incoming HTTP request */
-	HttpRequest* currentRequest;
+	HttpRequest *currentRequest;
 
 	/** Dispatches received requests to services */
-	HttpRequestHandler* requestHandler;
+	HttpRequestHandler *requestHandler;
 
 	/** This shows the busy-state from a very early time */
 	bool busy;
 
 	/** Configuration for SSL */
-	const QSslConfiguration* sslConfiguration;
+	const QSslConfiguration *sslConfiguration;
 
 	/**  Create SSL or TCP socket */
 	void createSocket();
@@ -111,15 +110,15 @@ public slots:
 	  @param socketDescriptor references the accepted connection.
 	*/
 	void handleConnection(const tSocketDescriptor socketDescriptor);
-	
+
 private slots:
-	
+
 	/** Received from the socket when a read-timeout occured */
 	void readTimeout();
-	
+
 	/** Received from the socket when incoming data can be read */
 	void read();
-	
+
 	/** Received from the socket when a connection has been closed */
 	void disconnected();
 };
