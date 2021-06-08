@@ -103,8 +103,8 @@ void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 #ifdef CMAKE_DEBUG
 		qDebug("HttpConnectionHandler (%p): Starting encryption",
 			static_cast<void *>(this));
-		(static_cast<QSslSocket *>(socket))->startServerEncryption();
 #endif
+		(static_cast<QSslSocket *>(socket))->startServerEncryption();
 	}
 #endif
 
