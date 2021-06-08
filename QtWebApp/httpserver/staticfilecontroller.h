@@ -13,8 +13,8 @@
 #include <QCache>
 #include <QMutex>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
   Delivers static files. It is usually called by the applications main request handler when
   the caller requests a path that is mapped to static files.
@@ -42,49 +42,50 @@ namespace qtwebapp {
   received a related HTTP request.
 */
 
-class QTWEBAPP_EXPORT StaticFileController : public HttpRequestHandler  {
+class QTWEBAPP_EXPORT StaticFileController : public HttpRequestHandler
+{
 	Q_OBJECT
 	Q_DISABLE_COPY(StaticFileController)
 public:
-	
 	/** Constructor */
-	StaticFileController(const StaticFileControllerConfig &cfg, QObject* parent = NULL);
-	
+	StaticFileController(
+		const StaticFileControllerConfig &cfg, QObject *parent = NULL);
+
 	/** Generates the response */
-	void service(HttpRequest& request, HttpResponse& response);
-	
+	void service(HttpRequest &request, HttpResponse &response);
+
 private:
-	
 	/** Encoding of text files */
 	QString encoding;
-	
+
 	/** Root directory of documents */
 	QString docroot;
-	
+
 	/** Maximum age of files in the browser cache */
 	int maxAge;
-	
-	struct CacheEntry {
+
+	struct CacheEntry
+	{
 		QByteArray document;
 		qint64 created;
 		QByteArray filename;
 	};
-	
+
 	/** Timeout for each cached file */
 	int cacheTimeout;
-	
+
 	/** Maximum size of files in cache, larger files are not cached */
 	int maxCachedFileSize;
-	
+
 	/** Cache storage */
-	QCache<QString,CacheEntry> cache;
-	
+	QCache<QString, CacheEntry> cache;
+
 	/** ETag storage */
-	QHash<QString,QByteArray> etag;
-	
+	QHash<QString, QByteArray> etag;
+
 	/** Used to synchronize cache access for threads */
 	QMutex mutex;
-	
+
 	/** Set a content-type header in the response depending on the ending of the filename */
 	void setContentType(const QString &fileName, HttpResponse &response) const;
 };

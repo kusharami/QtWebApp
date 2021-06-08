@@ -2,9 +2,7 @@
 
 using namespace qtwebapp;
 
-HttpServerConfig::HttpServerConfig()
-{
-}
+HttpServerConfig::HttpServerConfig() {}
 
 HttpServerConfig::HttpServerConfig(const QSettings &settings)
 {
@@ -21,20 +19,23 @@ void HttpServerConfig::parseSettings(const QSettings &settings)
 #ifdef Q_OS_WIN
 	if (settings.format() != QSettings::NativeFormat)
 #endif
-	fileName = settings.fileName();
-	
+		fileName = settings.fileName();
+
 	QString hoststr = settings.value("host").toString();
 	host = hoststr.isEmpty() ? QHostAddress::Any : QHostAddress(hoststr);
 	port = settings.value("port", port).toUInt();
-	
-	maxRequestSize = parseNum(settings.value("maxRequestSize", maxRequestSize), 1024);
-	maxMultipartSize = parseNum(settings.value("maxMultipartSize", maxMultipartSize), 1024);
-	
-	cleanupInterval = parseNum(settings.value("cleanupInterval", cleanupInterval));
-	
+
+	maxRequestSize =
+		parseNum(settings.value("maxRequestSize", maxRequestSize), 1024);
+	maxMultipartSize =
+		parseNum(settings.value("maxMultipartSize", maxMultipartSize), 1024);
+
+	cleanupInterval =
+		parseNum(settings.value("cleanupInterval", cleanupInterval));
+
 	minThreads = parseNum(settings.value("minThreads", minThreads));
 	maxThreads = parseNum(settings.value("maxThreads", maxThreads));
-	
+
 	readTimeout = parseNum(settings.value("readTimeout", readTimeout));
 	sslKeyFile = settings.value("sslKeyFile").toString();
 	sslCertFile = settings.value("sslCertFile").toString();
@@ -42,9 +43,7 @@ void HttpServerConfig::parseSettings(const QSettings &settings)
 
 // ###########################################################################################
 
-HttpSessionStoreConfig::HttpSessionStoreConfig()
-{
-}
+HttpSessionStoreConfig::HttpSessionStoreConfig() {}
 
 HttpSessionStoreConfig::HttpSessionStoreConfig(const QSettings &settings)
 {
@@ -58,21 +57,22 @@ HttpSessionStoreConfig::HttpSessionStoreConfig(QSettings *settings)
 
 void HttpSessionStoreConfig::parseSettings(const QSettings &settings)
 {
-	expirationTime = parseNum(settings.value("expirationTime", (qulonglong)expirationTime), 1000);
+	expirationTime = parseNum(
+		settings.value("expirationTime", (qulonglong) expirationTime), 1000);
 	cookieName = settings.value("cookieName", cookieName).toByteArray();
-	
+
 	cookiePath = settings.value("cookiePath", cookiePath).toByteArray();
-	cookieComment = settings.value("cookieComment", cookieComment).toByteArray();
+	cookieComment =
+		settings.value("cookieComment", cookieComment).toByteArray();
 	cookieDomain = settings.value("cookieDomain", cookieDomain).toByteArray();
 }
 
 // ###########################################################################################
 
-StaticFileControllerConfig::StaticFileControllerConfig()
-{
-}
+StaticFileControllerConfig::StaticFileControllerConfig() {}
 
-StaticFileControllerConfig::StaticFileControllerConfig(const QSettings &settings)
+StaticFileControllerConfig::StaticFileControllerConfig(
+	const QSettings &settings)
 {
 	parseSettings(settings);
 }
@@ -87,14 +87,15 @@ void StaticFileControllerConfig::parseSettings(const QSettings &settings)
 #ifdef Q_OS_WIN
 	if (settings.format() != QSettings::NativeFormat)
 #endif
-	fileName = settings.fileName();
-	
+		fileName = settings.fileName();
+
 	path = settings.value("path", path).toString();
 	encoding = settings.value("encoding", encoding).toString();
-	
+
 	maxAge = parseNum(settings.value("maxAge", maxAge));
-	maxCachedFileSize = parseNum(settings.value("maxCachedFileSize", maxCachedFileSize), 1024);
-	
+	maxCachedFileSize =
+		parseNum(settings.value("maxCachedFileSize", maxCachedFileSize), 1024);
+
 	cacheSize = parseNum(settings.value("cacheSize", cacheSize), 1024);
 	cacheTime = parseNum(settings.value("cacheTime", cacheTime));
 }

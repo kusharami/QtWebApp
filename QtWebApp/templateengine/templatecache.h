@@ -6,8 +6,8 @@
 
 #include <QCache>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
   Caching template loader, reduces the amount of I/O and improves performance
   on remote file systems. The cache has a limited size, it prefers to keep
@@ -42,12 +42,12 @@ namespace qtwebapp {
   @see TemplateLoader
 */
 
-class QTWEBAPP_EXPORT TemplateCache : public TemplateLoader {
-    Q_OBJECT
-    Q_DISABLE_COPY(TemplateCache)
+class QTWEBAPP_EXPORT TemplateCache : public TemplateLoader
+{
+	Q_OBJECT
+	Q_DISABLE_COPY(TemplateCache)
 public:
-
-    /**
+	/**
       Constructor.
       @param settings Configuration settings, usually stored in an INI file. Must not be 0.
       Settings are read from the current group, so the caller must have called settings->beginGroup().
@@ -57,32 +57,31 @@ public:
       should destroy it during shutdown.
       @param parent Parent object
     */
-    TemplateCache(const TemplateEngineConfig &cfg, QObject* parent=nullptr);
+	TemplateCache(const TemplateEngineConfig &cfg, QObject *parent = nullptr);
 
 protected:
-
-    /**
+	/**
       Try to get a file from cache or filesystem.
       @param localizedName Name of the template with locale to find
       @return The template document, or empty string if not found
     */
-    virtual QString tryFile(const QString &localizedName);
+	virtual QString tryFile(const QString &localizedName);
 
 private:
+	struct CacheEntry
+	{
+		QString document;
+		qint64 created;
+	};
 
-    struct CacheEntry {
-        QString document;
-        qint64 created;
-    };
+	/** Timeout for each cached file */
+	int cacheTimeout;
 
-    /** Timeout for each cached file */
-    int cacheTimeout;
+	/** Cache storage */
+	QCache<QString, CacheEntry> cache;
 
-    /** Cache storage */
-    QCache<QString,CacheEntry> cache;
-
-    /** Used to synchronize threads */
-    QMutex mutex;
+	/** Used to synchronize threads */
+	QMutex mutex;
 };
 
 } // end of namespace

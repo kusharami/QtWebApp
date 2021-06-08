@@ -10,8 +10,8 @@
 #include <QDateTime>
 #include <QHash>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
   Represents a single log message together with some data
   that are used to decorate the log message.
@@ -34,10 +34,9 @@ namespace qtwebapp {
 
 class QTWEBAPP_EXPORT LogMessage
 {
-    Q_DISABLE_COPY(LogMessage)
+	Q_DISABLE_COPY(LogMessage)
 public:
-
-    /**
+	/**
       Constructor. All parameters are copied, so that later changes to them do not
       affect this object.
       @param type Type of the message
@@ -47,49 +46,49 @@ public:
       @param function Name of the function where the message was generated
       @param line Line Number of the source file, where the message was generated
     */
-    LogMessage(const QtMsgType type, const QString& message, const QHash<QString,QString>* logVars,
-               const QString &file, const QString &function, const int line);
+	LogMessage(const QtMsgType type, const QString &message,
+		const QHash<QString, QString> *logVars, const QString &file,
+		const QString &function, const int line);
 
-    /**
+	/**
       Returns the log message as decorated string.
       @param msgFormat Format of the decoration. May contain variables and static text,
           e.g. "{timestamp} {type} thread={thread}: {msg}".
       @param timestampFormat Format of timestamp, e.g. "dd.MM.yyyy hh:mm:ss.zzz", see QDateTime::toString().
       @see QDatetime for a description of the timestamp format pattern
     */
-    QString toString(const QString& msgFormat, const QString& timestampFormat) const;
+	QString toString(
+		const QString &msgFormat, const QString &timestampFormat) const;
 
-    /**
+	/**
       Get the message type.
     */
-    QtMsgType getType() const;
+	QtMsgType getType() const;
 
 private:
+	/** Logger variables */
+	QHash<QString, QString> logVars;
 
-    /** Logger variables */
-    QHash<QString,QString> logVars;
+	/** Date and time of creation */
+	QDateTime timestamp;
 
-    /** Date and time of creation */
-    QDateTime timestamp;
+	/** Type of the message */
+	QtMsgType type;
 
-    /** Type of the message */
-    QtMsgType type;
+	/** ID number of the thread  */
+	Qt::HANDLE threadId;
 
-    /** ID number of the thread  */
-    Qt::HANDLE threadId;
+	/** Message text */
+	QString message;
 
-    /** Message text */
-    QString message;
+	/** Filename where the message was generated */
+	QString file;
 
-    /** Filename where the message was generated */
-    QString file;
+	/** Function name where the message was generated */
+	QString function;
 
-    /** Function name where the message was generated */
-    QString function;
-
-    /** Line number where the message was generated */
-    int line;
-
+	/** Line number where the message was generated */
+	int line;
 };
 
 } // end of namespace

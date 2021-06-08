@@ -10,8 +10,8 @@
 #include <QFile>
 #include <QTextCodec>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
  Enhanced version of QString for template processing. Templates
  are usually loaded from files, but may also be loaded from
@@ -85,16 +85,16 @@ namespace qtwebapp {
  @see TemplateCache
 */
 
-class QTWEBAPP_EXPORT Template : public QString {
+class QTWEBAPP_EXPORT Template : public QString
+{
 public:
-	
 	/**
 	  Constructor that reads the template from a string.
 	  @param source The template source text
 	  @param sourceName Name of the source file, used for logging
 	*/
 	Template(const QString &source, const QString &sourceName);
-	
+
 	/**
 	  Constructor that reads the template from a file. Note that this class does not
 	  cache template files by itself, so using this constructor is only recommended
@@ -105,7 +105,7 @@ public:
 	  @see TemplateCache
 	*/
 	Template(QFile &file, const QTextCodec *textCodec);
-	
+
 	/**
 	  Replace a variable by the given value.
 	  Affects tags with the syntax
@@ -120,7 +120,7 @@ public:
 	  @return The count of variables that have been processed
 	*/
 	int setVariable(const QString &name, const QString &value);
-	
+
 	/**
 	  Set a condition. This affects tags with the syntax
 	  
@@ -134,7 +134,7 @@ public:
 	 @return The count of conditions that have been processed
 	*/
 	int setCondition(const QString &name, bool value);
-	
+
 	/**
 	 Set number of repetitions of a loop.
 	 This affects tags with the syntax
@@ -147,18 +147,17 @@ public:
 	 @return The number of loops that have been processed
 	*/
 	int loop(const QString &name, const int repetitions);
-	
+
 	/**
 	 Enable warnings for missing tags
 	 @param enable Warnings are enabled, if true
 	*/
-	void enableWarnings(const bool enable=true);
-	
+	void enableWarnings(const bool enable = true);
+
 private:
-	
 	/** Name of the source file */
 	QString sourceName;
-	
+
 	/** Enables warnings, if true */
 	bool warnings;
 };

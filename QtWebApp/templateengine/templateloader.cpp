@@ -12,51 +12,52 @@
 
 using namespace qtwebapp;
 
-TemplateLoader::TemplateLoader(const TemplateEngineConfig &cfg, QObject* parent)
+TemplateLoader::TemplateLoader(const TemplateEngineConfig &cfg, QObject *parent)
 	: QObject(parent)
 {
-	templatePath=cfg.path;
+	templatePath = cfg.path;
 	// Convert relative path to absolute, based on the directory of the config file.
 	if (!cfg.fileName.isEmpty() && QDir::isRelativePath(templatePath))
 	{
 		QFileInfo configFile(cfg.fileName);
-		templatePath=QFileInfo(configFile.absolutePath(),templatePath).absoluteFilePath();
+		templatePath = QFileInfo(configFile.absolutePath(), templatePath)
+						   .absoluteFilePath();
 	}
-	fileNameSuffix=cfg.suffix;
-	QString encoding=cfg.encoding;
+	fileNameSuffix = cfg.suffix;
+	QString encoding = cfg.encoding;
 	if (encoding.isEmpty())
 	{
-		textCodec=QTextCodec::codecForLocale();
-	}
-	else
+		textCodec = QTextCodec::codecForLocale();
+	} else
 	{
-		textCodec=QTextCodec::codecForName(encoding.toLocal8Bit());
+		textCodec = QTextCodec::codecForName(encoding.toLocal8Bit());
 	}
 #ifdef CMAKE_DEBUG
-	qDebug("TemplateLoader: path=%s, codec=%s",qPrintable(templatePath),textCodec->name().data());
+	qDebug("TemplateLoader: path=%s, codec=%s", qPrintable(templatePath),
+		textCodec->name().data());
 #endif
 }
 
-TemplateLoader::~TemplateLoader()
-{}
+TemplateLoader::~TemplateLoader() {}
 
 QString TemplateLoader::tryFile(const QString &localizedName)
 {
-	QString fileName=templatePath+"/"+localizedName+fileNameSuffix;
+	QString fileName = templatePath + "/" + localizedName + fileNameSuffix;
 #ifdef CMAKE_DEBUG
-	qDebug("TemplateCache: trying file %s",qPrintable(fileName));
+	qDebug("TemplateCache: trying file %s", qPrintable(fileName));
 #endif
 	QFile file(fileName);
-	if (file.exists()) {
+	if (file.exists())
+	{
 		file.open(QIODevice::ReadOnly);
-		QString document=textCodec->toUnicode(file.readAll());
+		QString document = textCodec->toUnicode(file.readAll());
 		file.close();
 		if (file.error())
 		{
-			qCritical("TemplateLoader: cannot load file %s, %s",qPrintable(fileName),qPrintable(file.errorString()));
+			qCritical("TemplateLoader: cannot load file %s, %s",
+				qPrintable(fileName), qPrintable(file.errorString()));
 			return "";
-		}
-		else
+		} else
 		{
 			return document;
 		}
@@ -64,50 +65,53 @@ QString TemplateLoader::tryFile(const QString &localizedName)
 	return "";
 }
 
-Template TemplateLoader::getTemplate(const QString &templateName, const QString &locales)
+Template TemplateLoader::getTemplate(
+	const QString &templateName, const QString &locales)
 {
 	QSet<QString> tried; // used to suppress duplicate attempts
-	QStringList locs=locales.split(',',QString::SkipEmptyParts);
-	
+	QStringList locs = locales.split(',', QString::SkipEmptyParts);
+
 	// Search for exact match
-	foreach (QString loc,locs)
+	foreach (QString loc, locs)
 	{
-		loc.replace(QRegExp(";.*"),"");
-		loc.replace('-','_');
-		QString localizedName=templateName+"-"+loc.trimmed();
+		loc.replace(QRegExp(";.*"), "");
+		loc.replace('-', '_');
+		QString localizedName = templateName + "-" + loc.trimmed();
 		if (!tried.contains(localizedName))
 		{
-			QString document=tryFile(localizedName);
-			if (!document.isEmpty()) {
-				return Template(document,localizedName);
-			}
-			tried.insert(localizedName);
-		}
-	}
-	
-	// Search for correct language but any country
-	foreach (QString loc,locs)
-	{
-		loc.replace(QRegExp("[;_-].*"),"");
-		QString localizedName=templateName+"-"+loc.trimmed();
-		if (!tried.contains(localizedName))
-		{
-			QString document=tryFile(localizedName);
+			QString document = tryFile(localizedName);
 			if (!document.isEmpty())
 			{
-				return Template(document,localizedName);
+				return Template(document, localizedName);
 			}
 			tried.insert(localizedName);
 		}
 	}
-	
+
+	// Search for correct language but any country
+	foreach (QString loc, locs)
+	{
+		loc.replace(QRegExp("[;_-].*"), "");
+		QString localizedName = templateName + "-" + loc.trimmed();
+		if (!tried.contains(localizedName))
+		{
+			QString document = tryFile(localizedName);
+			if (!document.isEmpty())
+			{
+				return Template(document, localizedName);
+			}
+			tried.insert(localizedName);
+		}
+	}
+
 	// Search for default file
-	QString document=tryFile(templateName);
+	QString document = tryFile(templateName);
 	if (!document.isEmpty())
 	{
-		return Template(document,templateName);
+		return Template(document, templateName);
 	}
-	
-	qCritical("TemplateCache: cannot find template %s",qPrintable(templateName));
-	return Template("",templateName);
+
+	qCritical(
+		"TemplateCache: cannot find template %s", qPrintable(templateName));
+	return Template("", templateName);
 }

@@ -14,8 +14,8 @@
 #include <QBasicTimer>
 #include <QTcpServer>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
   Listens for incoming TCP connections and and passes all incoming HTTP requests to your implementation of HttpRequestHandler,
   which processes the request and generates the response (usually a HTML document).
@@ -41,11 +41,11 @@ namespace qtwebapp {
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize
 */
 
-class QTWEBAPP_EXPORT HttpListener : public QTcpServer {
+class QTWEBAPP_EXPORT HttpListener : public QTcpServer
+{
 	Q_OBJECT
 	Q_DISABLE_COPY(HttpListener)
 public:
-	
 	/**
 	  Constructor.
 	  Creates a connection pool and starts listening on the configured host and port.
@@ -54,47 +54,45 @@ public:
 	  @param parent Parent object.
 	  @warning Ensure to close or delete the listener before deleting the request handler.
 	*/
-	HttpListener(const HttpServerConfig &cfg, HttpRequestHandler* requestHandler, QObject* parent = NULL);
-	
+	HttpListener(const HttpServerConfig &cfg,
+		HttpRequestHandler *requestHandler, QObject *parent = NULL);
+
 	/** Destructor */
 	virtual ~HttpListener();
-	
+
 	/**
 	  Restart listeing after close().
 	*/
 	void listen();
-	
+
 	/**
 	 Closes the listener, waits until all pending requests are processed,
 	 then closes the connection pool.
 	*/
 	void close();
-	
+
 protected:
-	
 	/** Serves new incoming connection requests */
 	void incomingConnection(tSocketDescriptor socketDescriptor);
-	
+
 private:
-	
 	/** Configuration settings for the HTTP server */
 	HttpServerConfig cfg;
-	
+
 	/** Point to the reuqest handler which processes all HTTP requests */
-	HttpRequestHandler* requestHandler;
-	
+	HttpRequestHandler *requestHandler;
+
 	/** Pool of connection handlers */
-	HttpConnectionHandlerPool* pool;
-	
+	HttpConnectionHandlerPool *pool;
+
 signals:
-	
+
 	/**
 	  Sent to the connection handler to process a new incoming connection.
 	  @param socketDescriptor references the accepted connection.
 	*/
-	
+
 	void handleConnection(tSocketDescriptor socketDescriptor);
-	
 };
 
 } // end of namespace

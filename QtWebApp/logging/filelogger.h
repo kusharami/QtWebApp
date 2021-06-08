@@ -13,8 +13,8 @@
 #include <QMutex>
 #include <QSettings>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
   Logger that uses a text file for output. Settings are read from a
   config file using a QSettings object. Config settings can be changed at runtime.
@@ -52,11 +52,11 @@ namespace qtwebapp {
   @see Logger for a descrition of the buffer.
 */
 
-class QTWEBAPP_EXPORT FileLogger : public Logger {
+class QTWEBAPP_EXPORT FileLogger : public Logger
+{
 	Q_OBJECT
 	Q_DISABLE_COPY(FileLogger)
 public:
-	
 	/**
 	  Constructor.
 	  @param settings Configuration settings, usually stored in an INI file. Must not be 0.
@@ -68,64 +68,62 @@ public:
 	  @param refreshInterval Interval of checking for changed config settings in msec, or 0=disabled
 	  @param parent Parent object
 	*/
-	FileLogger(QSettings* settings, const int refreshInterval=10000, QObject* parent = nullptr);
-	
+	FileLogger(QSettings *settings, const int refreshInterval = 10000,
+		QObject *parent = nullptr);
+
 	/**
 	  Destructor. Closes the file.
 	*/
 	virtual ~FileLogger();
-	
+
 	/** Write a message to the log file */
-	virtual void write(const LogMessage* logMessage);
-	
+	virtual void write(const LogMessage *logMessage);
+
 protected:
-	
 	/**
 	  Handler for timer events.
 	  Refreshes config settings or synchronizes I/O buffer, depending on the event.
 	  This method is thread-safe.
 	  @param event used to distinguish between the two timers.
 	*/
-	void timerEvent(QTimerEvent* event);
-	
+	void timerEvent(QTimerEvent *event);
+
 private:
-	
 	/** Configured name of the log file */
 	QString fileName;
-	
+
 	/** Configured  maximum size of the file in bytes, or 0=unlimited */
 	long maxSize;
-	
+
 	/** Configured maximum number of backup files, or 0=unlimited */
 	int maxBackups;
-	
+
 	/** Pointer to the configuration settings */
-	QSettings* settings;
-	
+	QSettings *settings;
+
 	/** Output file, or 0=disabled */
-	QFile* file;
-	
+	QFile *file;
+
 	/** Timer for refreshing configuration settings */
 	QBasicTimer refreshTimer;
-	
+
 	/** Timer for flushing the file I/O buffer */
 	QBasicTimer flushTimer;
-	
+
 	/** Open the output file */
 	void open();
-	
+
 	/** Close the output file */
 	void close();
-	
+
 	/** Rotate files and delete some backups if there are too many */
 	void rotate();
-	
+
 	/**
 	  Refreshes the configuration settings.
 	  This method is thread-safe.
 	*/
 	void refreshSettings();
-	
 };
 
 } // end of namespace

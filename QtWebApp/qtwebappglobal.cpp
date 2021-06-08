@@ -13,11 +13,12 @@
 #error Please define QTWEBAPP_VERSION_STR
 #endif
 
-#define QTWEBAPP_VERSION ((QTWEBAPP_MAJOR << 16) | (QTWEBAPP_MINOR << 8) | QTWEBAPP_PATCH)
+#define QTWEBAPP_VERSION \
+	((QTWEBAPP_MAJOR << 16) | (QTWEBAPP_MINOR << 8) | QTWEBAPP_PATCH)
 
-const char* qtwebapp::getQtWebAppLibVersion()
+const char *qtwebapp::getQtWebAppLibVersion()
 {
-    return QTWEBAPP_VERSION_STR;
+	return QTWEBAPP_VERSION_STR;
 }
 int qtwebapp::getQtWebAppLibVersionMajor()
 {

@@ -12,8 +12,8 @@
 #include <QString>
 #include <QTcpSocket>
 
-namespace qtwebapp {
-
+namespace qtwebapp
+{
 /**
   This object represents a HTTP response, used to return something to the web client.
   <p>
@@ -33,16 +33,16 @@ namespace qtwebapp {
   before calling write(). Web Browsers use that information to display a progress bar.
 */
 
-class QTWEBAPP_EXPORT HttpResponse {
+class QTWEBAPP_EXPORT HttpResponse
+{
 	Q_DISABLE_COPY(HttpResponse)
 public:
-	
 	/**
 	  Constructor.
 	  @param socket used to write the response
 	*/
 	HttpResponse(QTcpSocket *socket);
-	
+
 	/**
 	  Set a HTTP response header.
 	  You must call this method before the first write().
@@ -58,18 +58,19 @@ public:
 	  @param value value of the header
 	*/
 	void setHeader(const QByteArray name, const int value);
-	
+
 	/** Get the map of HTTP response headers */
-	QMap<QByteArray,QByteArray>& getHeaders();
-	
+	QMap<QByteArray, QByteArray> &getHeaders();
+
 	/** Get the map of cookies */
-	QMap<QByteArray,HttpCookie>& getCookies();
-	
+	QMap<QByteArray, HttpCookie> &getCookies();
+
 	/**
 	  Set status code and description. The default is 200,OK.
 	  You must call this method before the first write().
 	*/
-	void setStatus(const int statusCode, const QByteArray &description=QByteArray());
+	void setStatus(
+		const int statusCode, const QByteArray &description = QByteArray());
 
 	/** Return the status code. */
 	int getStatusCode() const;
@@ -94,27 +95,27 @@ public:
 	  Indicates whether the body has been sent completely (write() has been called with lastPart=true).
 	*/
 	bool hasSentLastPart() const;
-	
+
 	/**
 	  Set a cookie.
 	  You must call this method before the first write().
 	*/
-	void setCookie(const HttpCookie& cookie);
-	
+	void setCookie(const HttpCookie &cookie);
+
 	/**
 	  Send a redirect response to the browser.
 	  Cannot be combined with write().
 	  @param url Destination URL
 	*/
-	void redirect(const QByteArray& url);
-	
+	void redirect(const QByteArray &url);
+
 	/**
 	 * Flush the output buffer (of the underlying socket).
 	 * You normally don't need to call this method because flush is
 	 * automatically called after HttpRequestHandler::service() returns.
 	 */
 	void flush();
-	
+
 	/**
 	 * May be used to check whether the connection to the web client has been lost.
 	 * This might be useful to cancel the generation of large or slow responses.
@@ -122,12 +123,11 @@ public:
 	bool isConnected() const;
 
 private:
-
 	/** Request headers */
-	QMap<QByteArray,QByteArray> headers;
+	QMap<QByteArray, QByteArray> headers;
 
 	/** Socket for writing output */
-	QTcpSocket* socket;
+	QTcpSocket *socket;
 
 	/** HTTP status code*/
 	int statusCode;
@@ -145,7 +145,7 @@ private:
 	bool chunkedMode;
 
 	/** Cookies */
-	QMap<QByteArray,HttpCookie> cookies;
+	QMap<QByteArray, HttpCookie> cookies;
 
 	/** Write raw data to the socket. This method blocks until all bytes have been passed to the TCP buffer */
 	bool writeToSocket(const QByteArray &data);
@@ -157,7 +157,6 @@ private:
 	  it automatically when required.
 	*/
 	void writeHeaders();
-	
 };
 
 } // end of namespace
