@@ -4,14 +4,15 @@
 */
 
 #include "filelogger.h"
-#include <QTime>
+
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QStringList>
 #include <QThread>
-#include <QtGlobal>
-#include <QFile>
+#include <QTime>
 #include <QTimerEvent>
-#include <QDir>
-#include <QFileInfo>
+#include <QtGlobal>
 #include <stdio.h>
 
 using namespace qtwebapp;
@@ -44,8 +45,28 @@ void FileLogger::refreshSettings()
 	timestampFormat =
 		settings->value("timestampFormat", "yyyy-MM-dd hh:mm:ss.zzz")
 			.toString();
-	minLevel = static_cast<QtMsgType>(settings->value("minLevel", 0).toInt());
 	bufferSize = settings->value("bufferSize", 0).toInt();
+
+	// Translate log level settings to enumeration value
+	QByteArray minLevelStr = settings->value("minLevel", "ALL").toByteArray();
+	if (minLevelStr == "ALL" || minLevelStr == "DEBUG" || minLevelStr == "0")
+	{
+		minLevel = QtMsgType::QtDebugMsg;
+	} else if (minLevelStr == "WARNING" || minLevelStr == "WARN" ||
+		minLevelStr == "1")
+	{
+		minLevel = QtMsgType::QtWarningMsg;
+	} else if (minLevelStr == "ERROR" || minLevelStr == "CRITICAL" ||
+		minLevelStr == "2")
+	{
+		minLevel = QtMsgType::QtCriticalMsg;
+	} else if (minLevelStr == "FATAL" || minLevelStr == "3")
+	{
+		minLevel = QtMsgType::QtFatalMsg;
+	} else if (minLevelStr == "INFO" || minLevelStr == "4")
+	{
+		minLevel = QtMsgType::QtInfoMsg;
+	}
 
 	// Create new file if the filename has been changed
 	if (oldFileName != fileName)

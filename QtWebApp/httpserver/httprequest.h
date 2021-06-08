@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
 #include "httpserverconfig.h"
+#include "qtwebappglobal.h"
 
 #include <QByteArray>
 #include <QHostAddress>
@@ -52,28 +52,28 @@ public:
 	};
 
 	/**
-      Constructor.
-      @param cfg Configuration
-    */
+	  Constructor.
+	  @param cfg Configuration
+	*/
 	HttpRequest(const HttpServerConfig &cfg);
 
 	/**
-      Destructor.
-    */
+	  Destructor.
+	*/
 	virtual ~HttpRequest();
 
 	/**
-      Read the HTTP request from a socket.
-      This method is called by the connection handler repeatedly
-      until the status is RequestStatus::complete or RequestStatus::abort.
-      @param socket Source of the data
-    */
+	  Read the HTTP request from a socket.
+	  This method is called by the connection handler repeatedly
+	  until the status is RequestStatus::complete or RequestStatus::abort.
+	  @param socket Source of the data
+	*/
 	void readFromSocket(QTcpSocket *socket);
 
 	/**
-      Get the status of this reqeust.
-      @see RequestStatus
-    */
+	  Get the status of this reqeust.
+	  @see RequestStatus
+	*/
 	RequestStatus getStatus() const;
 
 	/** Get the method of the HTTP request  (e.g. "GET") */
@@ -82,44 +82,46 @@ public:
 	/** Get the decoded path of the HTPP request (e.g. "/index.html") */
 	QByteArray getPath() const;
 
-	/** Get the raw path of the HTTP request (e.g. "/file%20with%20spaces.html") */
+	/** Get the raw path of the HTTP request
+	 * (e.g. "/file%20with%20spaces.html")
+	 */
 	const QByteArray &getRawPath() const;
 
 	/** Get the version of the HTPP request (e.g. "HTTP/1.1") */
 	QByteArray getVersion() const;
 
 	/**
-      Get the value of a HTTP request header.
-      @param name Name of the header, not case-senitive.
-      @return If the header occurs multiple times, only the last
-      one is returned.
-    */
+	  Get the value of a HTTP request header.
+	  @param name Name of the header, not case-senitive.
+	  @return If the header occurs multiple times, only the last
+	  one is returned.
+	*/
 	QByteArray getHeader(const QByteArray &name) const;
 
 	/**
-      Get the values of a HTTP request header.
-      @param name Name of the header, not case-senitive.
-    */
+	  Get the values of a HTTP request header.
+	  @param name Name of the header, not case-senitive.
+	*/
 	QList<QByteArray> getHeaders(const QByteArray &name) const;
 
 	/**
-     * Get all HTTP request headers. Note that the header names
-     * are returned in lower-case.
-     */
+	 * Get all HTTP request headers. Note that the header names
+	 * are returned in lower-case.
+	 */
 	QMultiMap<QByteArray, QByteArray> getHeaderMap() const;
 
 	/**
-      Get the value of a HTTP request parameter.
-      @param name Name of the parameter, case-sensitive.
-      @return If the parameter occurs multiple times, only the last
-      one is returned.
-    */
+	  Get the value of a HTTP request parameter.
+	  @param name Name of the parameter, case-sensitive.
+	  @return If the parameter occurs multiple times, only the last
+	  one is returned.
+	*/
 	QByteArray getParameter(const QByteArray &name) const;
 
 	/**
-      Get the values of a HTTP request parameter.
-      @param name Name of the parameter, case-sensitive.
-    */
+	  Get the values of a HTTP request parameter.
+	  @param name Name of the parameter, case-sensitive.
+	*/
 	QList<QByteArray> getParameters(const QByteArray &name) const;
 
 	/** Get all HTTP request parameters. */
@@ -129,37 +131,37 @@ public:
 	QByteArray getBody() const;
 
 	/**
-      Decode an URL parameter.
-      E.g. replace "%23" by '#' and replace '+' by ' '.
-      @param source The url encoded strings
-      @see QUrl::toPercentEncoding for the reverse direction
-    */
+	  Decode an URL parameter.
+	  E.g. replace "%23" by '#' and replace '+' by ' '.
+	  @param source The url encoded strings
+	  @see QUrl::toPercentEncoding for the reverse direction
+	*/
 	static QByteArray urlDecode(const QByteArray source);
 
 	/**
-      Get an uploaded file. The file is already open. It will
-      be closed and deleted by the destructor of this HttpRequest
-      object (after processing the request).
-      <p>
-      For uploaded files, the method getParameters() returns
-      the original fileName as provided by the calling web browser.
-    */
-	QTemporaryFile *getUploadedFile(const QByteArray fieldName) const;
+	  Get an uploaded file. The file is already open. It will
+	  be closed and deleted by the destructor of this HttpRequest
+	  object (after processing the request).
+	  <p>
+	  For uploaded files, the method getParameters() returns
+	  the original fileName as provided by the calling web browser.
+	*/
+	QFile *getUploadedFile(const QByteArray fieldName) const;
 
 	/**
-      Get the value of a cookie.
-      @param name Name of the cookie
-    */
+	  Get the value of a cookie.
+	  @param name Name of the cookie
+	*/
 	QByteArray getCookie(const QByteArray &name) const;
 
 	/** Get all cookies. */
 	QMap<QByteArray, QByteArray> &getCookieMap();
 
 	/**
-      Get the address of the connected client.
-      Note that multiple clients may have the same IP address, if they
-      share an internet connection (which is very common).
-     */
+	  Get the address of the connected client.
+	  Note that multiple clients may have the same IP address, if they
+	  share an internet connection (which is very common).
+	*/
 	QHostAddress getPeerAddress() const;
 
 private:
@@ -188,9 +190,9 @@ private:
 	QByteArray version;
 
 	/**
-      Status of this request. For the state engine.
-      @see RequestStatus
-    */
+	  Status of this request. For the state engine.
+	  @see RequestStatus
+	*/
 	RequestStatus status;
 
 	/** Address of the connected peer. */
@@ -229,7 +231,8 @@ private:
 	/** Sub-procedure of readFromSocket(), read the request body. */
 	void readBody(QTcpSocket *socket);
 
-	/** Sub-procedure of readFromSocket(), extract and decode request parameters. */
+	/** Sub-procedure of readFromSocket(),
+	 * extract and decode request parameters. */
 	void decodeRequestParams();
 
 	/** Sub-procedure of readFromSocket(), extract cookies from headers */
@@ -237,6 +240,9 @@ private:
 
 	/** Buffer for collecting characters of request and header lines */
 	QByteArray lineBuffer;
+
+	/** Directory for temporary files */
+	QString tmpDir;
 };
 
-} // end of namespace
+} // namespace qtwebapp

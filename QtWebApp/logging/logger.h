@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
 #include "logmessage.h"
+#include "qtwebappglobal.h"
 
 #include <QHash>
 #include <QMutex>
@@ -27,10 +27,9 @@ namespace qtwebapp
   taken from a static thread local dictionary.
   <p>
   The logger can collect a configurable number of messages in thread-local
-  ring buffers. If the buffer is enabled, then a log message with
-  severity >= minLevel flushes the buffer, so the stored messages are
-  written out. There is one exception: INFO messages are treated like DEBUG messages
-  (level 0).
+  FIFO buffers. A log message with severity >= minLevel flushes the buffer,
+  so the messages are written out. There is one exception:
+  INFO messages are treated like DEBUG messages (level 0).
   <p>
   Example: If you enable the buffer and use minLevel=2, then the application
   waits until an error occurs. Then it writes out the error message together
@@ -42,13 +41,12 @@ namespace qtwebapp
   <p>
   The logger can be registered to handle messages from
   the static global functions qDebug(), qWarning(), qCritical(), qFatal() and qInfo().
-  
+
   @see set() describes how to set logger variables
   @see LogMessage for a description of the message decoration.
   @warning You should prefer a derived class, for example FileLogger,
   because logging to the console is less useful.
 */
-
 class QTWEBAPP_EXPORT Logger : public QObject
 {
 	Q_OBJECT
@@ -63,11 +61,12 @@ public:
 
 	/**
 	  Constructor.
-      Possible log levels are: 0=DEBUG, 1=WARNING, 2=CRITICAL, 3=FATAL, 4=INFO
+	  Possible log levels are: 0=DEBUG, 1=WARNING, 2=CRITICAL, 3=FATAL, 4=INFO
 	  @param msgFormat Format of the decoration, e.g. "{timestamp} {type} thread={thread}: {msg}"
 	  @param timestampFormat Format of timestamp, e.g. "dd.MM.yyyy hh:mm:ss.zzz"
-      @param minLevel If bufferSize=0: Messages with lower level discarded.<br>
-                      If buffersize>0: Messages with lower level are buffered, messages with equal or higher level trigger writing the buffered content.
+	  @param minLevel If bufferSize=0: Messages with lower level discarded.<br>
+					  If buffersize>0: Messages with lower level are buffered, messages with equal or higher level
+	  trigger writing the buffered content.
 	  @param bufferSize Size of the backtrace buffer, number of messages per thread. 0=disabled.
 	  @param parent Parent object
 	  @see LogMessage for a description of the message decoration.
@@ -87,7 +86,8 @@ public:
 	  @param message Message text
 	  @param file Name of the source file where the message was generated (usually filled with the macro __FILE__)
 	  @param function Name of the function where the message was generated (usually filled with the macro __LINE__)
-	  @param line Line Number of the source file, where the message was generated (usually filles with the macro __func__ or __FUNCTION__)
+	  @param line Line Number of the source file, where the message was generated (usually filles with the macro __func__
+	  or __FUNCTION__)
 	  @see LogMessage for a description of the message decoration.
 	*/
 	virtual void log(const QtMsgType type, const QString &message,
@@ -124,7 +124,8 @@ protected:
 	/** Format string of timestamps */
 	QString timestampFormat;
 
-	/** Minimum level of message types that are written out directly or trigger writing the buffered content. */
+	/** Minimum level of message types that are written
+	 * out directly or trigger writing the buffered content. */
 	QtMsgType minLevel;
 
 	/** Size of backtrace buffer, number of messages per thread. 0=disabled */
@@ -158,35 +159,22 @@ private:
 	  @param message Message text
 	  @param file Name of the source file where the message was generated (usually filled with the macro __FILE__)
 	  @param function Name of the function where the message was generated (usually filled with the macro __LINE__)
-	  @param line Line Number of the source file, where the message was generated (usually filles with the macro __func__ or __FUNCTION__)
+	  @param line Line Number of the source file, where the message was generated (usually filles with the macro __func__
+	  or __FUNCTION__)
 	*/
 	static void msgHandler(const QtMsgType type, const QString &message,
 		const QString &file = "", const QString &function = "",
 		const int line = 0);
 
-#if QT_VERSION >= 0x050000
-
 	/**
-	  Wrapper for QT version 5.
-	  @param type Message type (level)
-	  @param context Message context
-	  @param message Message text
-	  @see msgHandler()
+	 Wrapper for QT version 5.
+	 @param type Message type (level)
+	 @param context Message context
+	 @param message Message text
+	 @see msgHandler()
 	*/
 	static void msgHandler5(const QtMsgType type,
 		const QMessageLogContext &context, const QString &message);
-
-#else
-
-	/**
-	  Wrapper for QT version 4.
-	  @param type Message type (level)
-	  @param message Message text
-	  @see msgHandler()
-	*/
-	static void msgHandler4(const QtMsgType type, const char *message);
-
-#endif
 
 	/** Thread local variables to be used in log messages */
 	static QThreadStorage<QHash<QString, QString> *> logVars;
@@ -195,4 +183,4 @@ private:
 	QThreadStorage<QList<LogMessage *> *> buffers;
 };
 
-} // end of namespace
+} // namespace qtwebapp

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.1)
 project(QtWebApp CXX)
 
 set(qtwebapp_MAJOR 1)
-set(qtwebapp_MINOR 7)
-set(qtwebapp_PATCH 11)
+set(qtwebapp_MINOR 8)
+set(qtwebapp_PATCH 3)
 set(qtwebapp_VERSION ${qtwebapp_MAJOR}.${qtwebapp_MINOR}.${qtwebapp_PATCH})
 
 find_package(Qt5 REQUIRED COMPONENTS Core Network)
@@ -25,6 +25,7 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 	else()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fsanitize=undefined")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
 	endif()
 	add_definitions("-D_GLIBCXX_DEBUG")
 	add_definitions("-DQT_SHAREDPOINTER_TRACK_POINTERS")
@@ -41,6 +42,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_library(QtWebAppGlobal SHARED qtwebappglobal.cpp)
 target_include_directories(QtWebAppGlobal PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 	$<INSTALL_INTERFACE:include/qtwebapp>
 )
 target_link_libraries(QtWebAppGlobal Qt5::Core)

@@ -38,8 +38,9 @@ StaticFileController::StaticFileController(
 	cache.setMaxCost(cfg.cacheSize);
 	cacheTimeout = cfg.cacheTime;
 #ifdef CMAKE_DEBUG
-	qDebug("StaticFileController: cache timeout=%i, size=%i", cacheTimeout,
-		cache.maxCost());
+	long int cacheMaxCost = (long int) cache.maxCost();
+	qDebug("StaticFileController: cache timeout=%i, size=%li", cacheTimeout,
+		cacheMaxCost);
 #endif
 }
 
@@ -59,9 +60,9 @@ void StaticFileController::service(HttpRequest &request, HttpResponse &response)
 	CacheEntry *entry = cache.object(path);
 	if (entry && (cacheTimeout == 0 || entry->created > now - cacheTimeout))
 	{
-		QByteArray document =
-			entry
-				->document; //copy the cached document, because other threads may destroy the cached entry immediately after mutex unlock.
+		QByteArray document = entry->document; // copy the cached document,
+			// because other threads may destroy the cached
+			// entry immediately after mutex unlock.
 		QByteArray filename = entry->filename;
 		response.setHeader("ETag", "\"" + etag.value(path) + "\"");
 		mutex.unlock();

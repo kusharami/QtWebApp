@@ -1,7 +1,8 @@
 #include "templatecache.h"
+
 #include <QDateTime>
-#include <QStringList>
 #include <QSet>
+#include <QStringList>
 
 using namespace qtwebapp;
 
@@ -11,7 +12,8 @@ TemplateCache::TemplateCache(const TemplateEngineConfig &cfg, QObject *parent)
 	cache.setMaxCost(cfg.cacheSize);
 	cacheTimeout = cfg.cacheTime;
 #ifdef CMAKE_DEBUG
-	qDebug("TemplateCache: timeout=%i, size=%i", cacheTimeout, cache.maxCost());
+	long int cacheMaxCost = (long int) cache.maxCost();
+	qDebug("TemplateCache: timeout=%i, size=%li", cacheTimeout, cacheMaxCost);
 #endif
 }
 

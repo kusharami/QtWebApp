@@ -4,11 +4,14 @@
 */
 
 #include "templateloader.h"
+
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QStringList>
-#include <QDir>
+#include <QRegularExpression>
 #include <QSet>
+#include <QStringList>
+#include <QTextStream>
 
 using namespace qtwebapp;
 
@@ -34,7 +37,7 @@ TemplateLoader::TemplateLoader(const TemplateEngineConfig &cfg, QObject *parent)
 	}
 #ifdef CMAKE_DEBUG
 	qDebug("TemplateLoader: path=%s, codec=%s", qPrintable(templatePath),
-		textCodec->name().data());
+		qPrintable(encoding));
 #endif
 }
 
@@ -69,13 +72,20 @@ Template TemplateLoader::getTemplate(
 	const QString &templateName, const QString &locales)
 {
 	QSet<QString> tried; // used to suppress duplicate attempts
-	QStringList locs = locales.split(',', QString::SkipEmptyParts);
+	QStringList locs = locales.split(',',
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+		Qt::SkipEmptyParts
+#else
+		QString::SkipEmptyParts
+#endif
+	);
 
 	// Search for exact match
 	foreach (QString loc, locs)
 	{
-		loc.replace(QRegExp(";.*"), "");
+		loc.replace(QRegularExpression(";.*"), "");
 		loc.replace('-', '_');
+
 		QString localizedName = templateName + "-" + loc.trimmed();
 		if (!tried.contains(localizedName))
 		{
@@ -91,7 +101,7 @@ Template TemplateLoader::getTemplate(
 	// Search for correct language but any country
 	foreach (QString loc, locs)
 	{
-		loc.replace(QRegExp("[;_-].*"), "");
+		loc.replace(QRegularExpression("[;_-].*"), "");
 		QString localizedName = templateName + "-" + loc.trimmed();
 		if (!tried.contains(localizedName))
 		{

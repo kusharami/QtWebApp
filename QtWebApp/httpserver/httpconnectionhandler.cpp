@@ -4,6 +4,7 @@
 */
 
 #include "httpconnectionhandler.h"
+
 #include "httpresponse.h"
 
 using namespace qtwebapp;
@@ -76,7 +77,7 @@ void HttpConnectionHandler::createSocket()
 	socket = new QTcpSocket();
 }
 
-void HttpConnectionHandler::handleConnection(tSocketDescriptor socketDescriptor)
+void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 {
 #ifdef CMAKE_DEBUG
 	qDebug("HttpConnectionHandler (%p): handle new connection",

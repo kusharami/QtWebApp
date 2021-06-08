@@ -4,8 +4,10 @@
 */
 
 #include "httplistener.h"
+
 #include "httpconnectionhandler.h"
 #include "httpconnectionhandlerpool.h"
+
 #include <QCoreApplication>
 
 using namespace qtwebapp;
@@ -19,7 +21,7 @@ HttpListener::HttpListener(const HttpServerConfig &cfg,
 	pool = nullptr;
 	this->requestHandler = requestHandler;
 	// Reqister type of socketDescriptor for signal/slot handling
-	qRegisterMetaType<tSocketDescriptor>("tSocketDescriptor");
+	qRegisterMetaType<qintptr>("qintptr");
 	// Start listening
 	listen();
 }
@@ -62,7 +64,7 @@ void HttpListener::close()
 	}
 }
 
-void HttpListener::incomingConnection(tSocketDescriptor socketDescriptor)
+void HttpListener::incomingConnection(qintptr socketDescriptor)
 {
 #ifdef SUPERVERBOSE
 	qDebug("HttpListener: New connection");
@@ -79,7 +81,7 @@ void HttpListener::incomingConnection(tSocketDescriptor socketDescriptor)
 	{
 		// The descriptor is passed via event queue because the handler lives in another thread
 		QMetaObject::invokeMethod(freeHandler, "handleConnection",
-			Qt::QueuedConnection, Q_ARG(tSocketDescriptor, socketDescriptor));
+			Qt::QueuedConnection, Q_ARG(qintptr, socketDescriptor));
 	} else
 	{
 		// Reject the connection

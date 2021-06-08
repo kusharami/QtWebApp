@@ -4,6 +4,7 @@
 
 #include <QHostAddress>
 #include <QSettings>
+#include <QStandardPaths>
 
 namespace qtwebapp
 {
@@ -51,6 +52,10 @@ public:
 	/// The file required for SSL support.
 	QString sslKeyFile, sslCertFile;
 
+	// Temporary directory
+	QString tmpDir =
+		QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+
 private:
 	void parseSettings(const QSettings &settings);
 
@@ -76,7 +81,7 @@ public:
 	HttpSessionStoreConfig(QSettings *settings);
 
 	/// The expiration time of the cookie.
-	quint64 expirationTime = 3600e3;
+	qint64 expirationTime = 3600e3;
 	/// The name of the cookie.
 	QByteArray cookieName = "sessionid";
 
@@ -136,4 +141,6 @@ private:
 	/// relative paths.
 	QString fileName;
 };
-}
+
+} // namespace qtwebapp
+

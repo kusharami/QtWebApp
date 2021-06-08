@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
 #include "httprequest.h"
 #include "httprequesthandler.h"
 #include "httpresponse.h"
+#include "qtwebappglobal.h"
 
 #include <QCache>
 #include <QMutex>
@@ -41,7 +41,6 @@ namespace qtwebapp
   useless. Better create one instance during start-up and call it when the application
   received a related HTTP request.
 */
-
 class QTWEBAPP_EXPORT StaticFileController : public HttpRequestHandler
 {
 	Q_OBJECT
@@ -86,8 +85,9 @@ private:
 	/** Used to synchronize cache access for threads */
 	QMutex mutex;
 
-	/** Set a content-type header in the response depending on the ending of the filename */
+	/** Set a content-type header in the response depending
+	 * on the ending of the filename */
 	void setContentType(const QString &fileName, HttpResponse &response) const;
 };
 
-} // end of namespace
+} // namespace qtwebapp

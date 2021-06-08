@@ -37,6 +37,7 @@ void HttpServerConfig::parseSettings(const QSettings &settings)
 	maxThreads = parseNum(settings.value("maxThreads", maxThreads));
 
 	readTimeout = parseNum(settings.value("readTimeout", readTimeout));
+
 	sslKeyFile = settings.value("sslKeyFile").toString();
 	sslCertFile = settings.value("sslCertFile").toString();
 }
@@ -57,8 +58,9 @@ HttpSessionStoreConfig::HttpSessionStoreConfig(QSettings *settings)
 
 void HttpSessionStoreConfig::parseSettings(const QSettings &settings)
 {
-	expirationTime = parseNum(
-		settings.value("expirationTime", (qulonglong) expirationTime), 1000);
+	expirationTime =
+		parseNum(settings.value("expirationTime", expirationTime), 1000);
+
 	cookieName = settings.value("cookieName", cookieName).toByteArray();
 
 	cookiePath = settings.value("cookiePath", cookiePath).toByteArray();

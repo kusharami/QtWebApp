@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
 #include "httprequest.h"
 #include "httpresponse.h"
+#include "qtwebappglobal.h"
 
 namespace qtwebapp
 {
@@ -22,7 +22,6 @@ namespace qtwebapp
    that it is used by multiple threads simultaneously.
    @see StaticFileController which delivers static local files.
 */
-
 class QTWEBAPP_EXPORT HttpRequestHandler : public QObject
 {
 	Q_OBJECT
@@ -38,12 +37,12 @@ public:
 	}
 
 	/**
-      Generate a response for an incoming HTTP request.
-      @param request The received HTTP request
-      @param response Must be used to return the response
-      @warning This method must be thread safe
-    */
+	  Generate a response for an incoming HTTP request.
+	  @param request The received HTTP request
+	  @param response Must be used to return the response
+	  @warning This method must be thread safe
+	*/
 	virtual void service(HttpRequest &request, HttpResponse &response) = 0;
 };
 
-} // end of namespace
+} // namespace qtwebapp

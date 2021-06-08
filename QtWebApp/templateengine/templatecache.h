@@ -41,31 +41,30 @@ namespace qtwebapp
   Files are cached as long as possible, when cacheTime=0.
   @see TemplateLoader
 */
-
 class QTWEBAPP_EXPORT TemplateCache : public TemplateLoader
 {
 	Q_OBJECT
 	Q_DISABLE_COPY(TemplateCache)
 public:
 	/**
-      Constructor.
-      @param settings Configuration settings, usually stored in an INI file. Must not be 0.
-      Settings are read from the current group, so the caller must have called settings->beginGroup().
-      Because the group must not change during runtime, it is recommended to provide a
-      separate QSettings instance that is not used by other parts of the program.
-      The TemplateCache does not take over ownership of the QSettings instance, so the caller
-      should destroy it during shutdown.
-      @param parent Parent object
-    */
+	  Constructor.
+	  @param settings Configuration settings, usually stored in an INI file. Must not be 0.
+	  Settings are read from the current group, so the caller must have called settings->beginGroup().
+	  Because the group must not change during runtime, it is recommended to provide a
+	  separate QSettings instance that is not used by other parts of the program.
+	  The TemplateCache does not take over ownership of the QSettings instance, so the caller
+	  should destroy it during shutdown.
+	  @param parent Parent object
+	*/
 	TemplateCache(const TemplateEngineConfig &cfg, QObject *parent = nullptr);
 
 protected:
 	/**
-      Try to get a file from cache or filesystem.
-      @param localizedName Name of the template with locale to find
-      @return The template document, or empty string if not found
-    */
-	virtual QString tryFile(const QString &localizedName);
+	  Try to get a file from cache or filesystem.
+	  @param localizedName Name of the template with locale to find
+	  @return The template document, or empty string if not found
+	*/
+	QString tryFile(const QString &localizedName) override;
 
 private:
 	struct CacheEntry
@@ -84,4 +83,4 @@ private:
 	QMutex mutex;
 };
 
-} // end of namespace
+} // namespace qtwebapp

@@ -20,13 +20,13 @@ namespace qtwebapp
   Loads localized versions of template files. If the caller requests a file with the
   name "index" and the suffix is ".tpl" and the requested locale is "de_DE, de, en-US",
   then files are searched in the following order:
-  
+
   - index-de_DE.tpl
   - index-de.tpl
   - index-en_US.tpl
   - index-en.tpl
   - index.tpl
-  
+
   The following settings are required:
   <code><pre>
   path=../templates
@@ -37,7 +37,6 @@ namespace qtwebapp
   settings are in the registry, the path is relative to the current working directory.
   @see TemplateCache
 */
-
 class QTWEBAPP_EXPORT TemplateLoader : public QObject
 {
 	Q_OBJECT
@@ -83,4 +82,4 @@ protected:
 	QTextCodec *textCodec;
 };
 
-} // end of namespace
+} // namespace qtwebapp

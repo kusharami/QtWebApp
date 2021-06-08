@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
 #include "filelogger.h"
 #include "logger.h"
+#include "qtwebappglobal.h"
 
 #include <QSettings>
 
@@ -16,13 +16,13 @@ namespace qtwebapp
 /**
   Writes log messages into two log files simultaneously.
   I recommend to configure:
-  - One "main" logfile with minLevel=1 or 2 and bufferSize=0. This file is for the operator to see when a problem occured.
-  - A second "debug" logfile with minLevel=1 or 2 and bufferSize=100. This file is for the developer who may need more details (the debug messages) about the
-  situation that leaded to the error.
+  - One "main" logfile with minLevel=1 or 2 and bufferSize=0. This file is for the operator to see when a problem
+  occured.
+  - A second "debug" logfile with minLevel=1 or 2 and bufferSize=100. This file is for the developer who may need more
+  details (the debug messages) about the situation that leaded to the error.
 
   @see FileLogger for a description of the two underlying loggers.
 */
-
 class QTWEBAPP_EXPORT DualFileLogger : public Logger
 {
 	Q_OBJECT
@@ -51,7 +51,8 @@ public:
 	  @param message Message text
 	  @param file Name of the source file where the message was generated (usually filled with the macro __FILE__)
 	  @param function Name of the function where the message was generated (usually filled with the macro __LINE__)
-	  @param line Line Number of the source file, where the message was generated (usually filles with the macro __func__ or __FUNCTION__)
+	  @param line Line Number of the source file, where the message was generated (usually filles with the macro __func__
+	  or __FUNCTION__)
 	  @see LogMessage for a description of the message decoration.
 	*/
 	virtual void log(const QtMsgType type, const QString &message,
@@ -74,4 +75,4 @@ private:
 	FileLogger *secondLogger;
 };
 
-} // end of namespace
+} // namespace qtwebapp

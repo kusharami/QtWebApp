@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
 #include "httpcookie.h"
+#include "qtwebappglobal.h"
 
 #include <QMap>
 #include <QString>
@@ -18,21 +18,20 @@ namespace qtwebapp
   This object represents a HTTP response, used to return something to the web client.
   <p>
   <code><pre>
-	response.setStatus(200,"OK"); // optional, because this is the default
-	response.writeBody("Hello");
-	response.writeBody("World!",true);
+    response.setStatus(200,"OK"); // optional, because this is the default
+    response.writeBody("Hello");
+    response.writeBody("World!",true);
   </pre></code>
   <p>
   Example how to return an error:
   <code><pre>
-	response.setStatus(500,"server error");
-	response.write("The request cannot be processed because the servers is broken",true);
+    response.setStatus(500,"server error");
+    response.write("The request cannot be processed because the servers is broken",true);
   </pre></code>
   <p>
   In case of large responses (e.g. file downloads), a Content-Length header should be set
   before calling write(). Web Browsers use that information to display a progress bar.
 */
-
 class QTWEBAPP_EXPORT HttpResponse
 {
 	Q_DISABLE_COPY(HttpResponse)
@@ -147,7 +146,8 @@ private:
 	/** Cookies */
 	QMap<QByteArray, HttpCookie> cookies;
 
-	/** Write raw data to the socket. This method blocks until all bytes have been passed to the TCP buffer */
+	/** Write raw data to the socket.
+	 * This method blocks until all bytes have been passed to the TCP buffer */
 	bool writeToSocket(const QByteArray &data);
 	bool writeToSocket(QIODevice *fromDevice);
 
@@ -159,4 +159,4 @@ private:
 	void writeHeaders();
 };
 
-} // end of namespace
+} // namespace qtwebapp

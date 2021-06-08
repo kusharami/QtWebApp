@@ -4,6 +4,7 @@
 */
 
 #include "httpsessionstore.h"
+
 #include <QDateTime>
 #include <QUuid>
 
@@ -17,7 +18,7 @@ HttpSessionStore::HttpSessionStore(
 	connect(&cleanupTimer, SIGNAL(timeout()), this, SLOT(sessionTimerEvent()));
 	cleanupTimer.start(60000);
 #ifdef CMAKE_DEBUG
-	qDebug("HttpSessionStore: Sessions expire after %i milliseconds",
+	qDebug("HttpSessionStore: Sessions expire after %lli milliseconds",
 		cfg.expirationTime);
 #endif
 }
@@ -69,7 +70,7 @@ HttpSession HttpSessionStore::getSession(
 			// Refresh the session cookie
 			response.setCookie(HttpCookie(cfg.cookieName, session.getId(),
 				cfg.expirationTime / 1000, cfg.cookiePath, cfg.cookieComment,
-				cfg.cookieDomain));
+				cfg.cookieDomain, false, false, "Lax"));
 			session.setLastAccess();
 			return session;
 		}
@@ -85,7 +86,7 @@ HttpSession HttpSessionStore::getSession(
 		sessions.insert(session.getId(), session);
 		response.setCookie(HttpCookie(cfg.cookieName, session.getId(),
 			cfg.expirationTime / 1000, cfg.cookiePath, cfg.cookieComment,
-			cfg.cookieDomain));
+			cfg.cookieDomain, false, false, "Lax"));
 		mutex.unlock();
 		return session;
 	}
@@ -114,10 +115,11 @@ void HttpSessionStore::sessionTimerEvent()
 		++i;
 		HttpSession session = prev.value();
 		qint64 lastAccess = session.getLastAccess();
-		if (now - lastAccess > qint64(cfg.expirationTime))
+		if (now - lastAccess > cfg.expirationTime)
 		{
 			qDebug(
 				"HttpSessionStore: session %s expired", session.getId().data());
+			emit sessionDeleted(session.getId());
 			sessions.erase(prev);
 		}
 	}
@@ -128,6 +130,7 @@ void HttpSessionStore::sessionTimerEvent()
 void HttpSessionStore::removeSession(HttpSession session)
 {
 	mutex.lock();
+	emit sessionDeleted(session.getId());
 	sessions.remove(session.getId());
 	mutex.unlock();
 }
