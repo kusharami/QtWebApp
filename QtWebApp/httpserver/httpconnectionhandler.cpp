@@ -19,6 +19,7 @@ HttpConnectionHandler::HttpConnectionHandler(const HttpServerConfig &cfg,
 	this->sslConfiguration = sslConfiguration;
 	currentRequest = nullptr;
 	busy = false;
+	reading = false;
 
 	// execute signals in a new thread
 	thread = new QThread();
@@ -135,6 +136,7 @@ void HttpConnectionHandler::destroy()
 
 void HttpConnectionHandler::readTimeout()
 {
+	Q_ASSERT(!reading);
 	qDebug("HttpConnectionHandler (%p): read timeout occured",
 		static_cast<void *>(this));
 
@@ -155,17 +157,25 @@ void HttpConnectionHandler::disconnected()
 		"HttpConnectionHandler (%p): disconnected", static_cast<void *>(this));
 #endif
 	socket->close();
-	readTimer.stop();
-	busy = false;
+	if (!reading)
+	{
+		readTimer.stop();
+		busy = false;
+	}
 }
 
 void HttpConnectionHandler::read()
 {
+	if (reading)
+	{
+		return;
+	}
+	reading = true;
+	readTimer.stop();
+	bool disconnect = false;
 	// The loop adds support for HTTP pipelinig
 	while (socket->bytesAvailable())
 	{
-		readTimer.stop();
-
 #ifdef SUPERVERBOSE
 		qDebug("HttpConnectionHandler (%p): read input",
 			static_cast<void *>(this));
@@ -188,14 +198,21 @@ void HttpConnectionHandler::read()
 		// If the request is aborted, return error message and close the connection
 		if (currentRequest->getStatus() == HttpRequest::abort)
 		{
-			socket->write("HTTP/1.1 413 entity too large\r\nConnection: "
-						  "close\r\n\r\n413 Entity too large\r\n");
-			while (socket->bytesToWrite())
-				socket->waitForBytesWritten();
-			socket->disconnectFromHost();
+			if (socket->isOpen())
+			{
+				socket->write("HTTP/1.1 413 entity too large\r\nConnection: "
+							  "close\r\n\r\n413 Entity too large\r\n");
+				while (socket->bytesToWrite())
+					socket->waitForBytesWritten();
+				socket->disconnectFromHost();
+			} else
+			{
+				busy = false;
+			}
+			disconnect = true;
 			delete currentRequest;
 			currentRequest = nullptr;
-			return;
+			break;
 		}
 
 		// If the request is complete, let the request mapper dispatch it
@@ -240,60 +257,69 @@ void HttpConnectionHandler::read()
 					static_cast<void *>(this));
 			}
 
-			// Finalize sending the response if not already done
-			if (!response.hasSentLastPart())
+			if (!socket->isOpen())
 			{
-				response.write(QByteArray(), true);
-			}
+				disconnect = true;
+			} else
+			{
+				// Finalize sending the response if not already done
+				if (!response.hasSentLastPart())
+				{
+					response.write(QByteArray(), true);
+				}
 
 #ifdef CMAKE_DEBUG
-			qDebug("HttpConnectionHandler (%p): finished request",
-				static_cast<void *>(this));
+				qDebug("HttpConnectionHandler (%p): finished request",
+					static_cast<void *>(this));
 #endif
 
-			// Find out whether the connection must be closed
-			if (!closeConnection)
-			{
-				// Maybe the request handler or mapper added a Connection:close header in the meantime
-				bool closeResponse =
-					QString::compare(response.getHeaders().value("Connection"),
-						"close", Qt::CaseInsensitive) == 0;
-				if (closeResponse == true)
+				// Find out whether the connection must be closed
+				if (!closeConnection)
 				{
-					closeConnection = true;
-				} else
-				{
-					// If we have no Content-Length header and did not use chunked mode, then we have to close the
-					// connection to tell the HTTP client that the end of the response has been reached.
-					bool hasContentLength =
-						response.getHeaders().contains("Content-Length");
-					if (!hasContentLength)
+					// Maybe the request handler or mapper added a Connection:close header in the meantime
+					bool closeResponse =
+						QString::compare(
+							response.getHeaders().value("Connection"), "close",
+							Qt::CaseInsensitive) == 0;
+					if (closeResponse)
 					{
-						bool hasChunkedMode =
-							QString::compare(response.getHeaders().value(
-												 "Transfer-Encoding"),
-								"chunked", Qt::CaseInsensitive) == 0;
-						if (!hasChunkedMode)
+						closeConnection = true;
+					} else
+					{
+						// If we have no Content-Length header and did not use chunked mode, then we have to close the
+						// connection to tell the HTTP client that the end of the response has been reached.
+						bool hasContentLength =
+							response.getHeaders().contains("Content-Length");
+						if (!hasContentLength)
 						{
-							closeConnection = true;
+							bool hasChunkedMode =
+								QString::compare(response.getHeaders().value(
+													 "Transfer-Encoding"),
+									"chunked", Qt::CaseInsensitive) == 0;
+							if (!hasChunkedMode)
+							{
+								closeConnection = true;
+							}
 						}
 					}
 				}
-			}
 
-			// Close the connection or prepare for the next request on the same connection.
-			if (closeConnection)
-			{
-				while (socket->bytesToWrite())
-					socket->waitForBytesWritten();
-				socket->disconnectFromHost();
-			} else
-			{
-				// Start timer for next request
-				readTimer.start(cfg.readTimeout);
+				// Close the connection or prepare for the next request on the same connection.
+				if (closeConnection)
+				{
+					while (socket->bytesToWrite())
+						socket->waitForBytesWritten();
+					socket->disconnectFromHost();
+					disconnect = true;
+				}
 			}
 			delete currentRequest;
 			currentRequest = nullptr;
 		}
+	}
+	if (!disconnect)
+	{
+		reading = false;
+		readTimer.start(cfg.readTimeout);
 	}
 }

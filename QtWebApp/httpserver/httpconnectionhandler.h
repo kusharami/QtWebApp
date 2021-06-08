@@ -96,6 +96,7 @@ private:
 
 	/** This shows the busy-state from a very early time */
 	bool busy;
+	bool reading;
 
 	/** Configuration for SSL */
 	const QSslConfiguration *sslConfiguration;
