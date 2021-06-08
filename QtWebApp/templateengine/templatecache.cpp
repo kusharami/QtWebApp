@@ -6,16 +6,19 @@
 
 using namespace qtwebapp;
 
-TemplateCache::TemplateCache(const TemplateEngineConfig &cfg, QObject *parent) : TemplateLoader(cfg, parent) {
+TemplateCache::TemplateCache(const TemplateEngineConfig &cfg, QObject *parent)
+	: TemplateLoader(cfg, parent)
+{
 	cache.setMaxCost(cfg.cacheSize);
 	cacheTimeout = cfg.cacheTime;
-	long int cacheMaxCost = (long int)cache.maxCost();
+	long int cacheMaxCost = (long int) cache.maxCost();
 #ifdef CMAKE_DEBUG
 	qDebug("TemplateCache: timeout=%i, size=%li", cacheTimeout, cacheMaxCost);
 #endif
 }
 
-QString TemplateCache::tryFile(const QString &localizedName) {
+QString TemplateCache::tryFile(const QString &localizedName)
+{
 	qint64 now = QDateTime::currentMSecsSinceEpoch();
 	mutex.lock();
 	// search in cache
@@ -23,7 +26,8 @@ QString TemplateCache::tryFile(const QString &localizedName) {
 	qDebug("TemplateCache: trying cached %s", qPrintable(localizedName));
 #endif
 	CacheEntry *entry = cache.object(localizedName);
-	if (entry && (cacheTimeout == 0 || entry->created > now - cacheTimeout)) {
+	if (entry && (cacheTimeout == 0 || entry->created > now - cacheTimeout))
+	{
 		mutex.unlock();
 		return entry->document;
 	}

@@ -4,15 +4,18 @@ using namespace qtwebapp;
 
 TemplateEngineConfig::TemplateEngineConfig() {}
 
-TemplateEngineConfig::TemplateEngineConfig(const QSettings &settings) {
+TemplateEngineConfig::TemplateEngineConfig(const QSettings &settings)
+{
 	parseSettings(settings);
 }
 
-TemplateEngineConfig::TemplateEngineConfig(QSettings *settings) {
+TemplateEngineConfig::TemplateEngineConfig(QSettings *settings)
+{
 	parseSettings(*settings);
 }
 
-void TemplateEngineConfig::parseSettings(const QSettings &settings) {
+void TemplateEngineConfig::parseSettings(const QSettings &settings)
+{
 #ifdef Q_OS_WIN
 	if (settings.format() != QSettings::NativeFormat)
 #endif

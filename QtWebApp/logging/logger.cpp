@@ -24,20 +24,27 @@ QThreadStorage<QHash<QString, QString> *> Logger::logVars;
 QMutex Logger::mutex;
 
 Logger::Logger(QObject *parent)
-    : QObject(parent), msgFormat("{timestamp} {type} {msg}"), timestampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
-      minLevel(QtDebugMsg), bufferSize(0) {}
+	: QObject(parent)
+	, msgFormat("{timestamp} {type} {msg}")
+	, timestampFormat("dd.MM.yyyy hh:mm:ss.zzz")
+	, minLevel(QtDebugMsg)
+	, bufferSize(0)
+{
+}
 
-Logger::Logger(const QString msgFormat, const QString timestampFormat, const QtMsgType minLevel, const int bufferSize,
-               QObject *parent)
-    : QObject(parent) {
+Logger::Logger(const QString msgFormat, const QString timestampFormat,
+	const QtMsgType minLevel, const int bufferSize, QObject *parent)
+	: QObject(parent)
+{
 	this->msgFormat = msgFormat;
 	this->timestampFormat = timestampFormat;
 	this->minLevel = minLevel;
 	this->bufferSize = bufferSize;
 }
 
-void Logger::msgHandler(const QtMsgType type, const QString &message, const QString &file, const QString &function,
-                        const int line) {
+void Logger::msgHandler(const QtMsgType type, const QString &message,
+	const QString &file, const QString &function, const int line)
+{
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
 	static QMutex recursiveMutex(QMutex::Recursive);
 #else
@@ -51,95 +58,118 @@ void Logger::msgHandler(const QtMsgType type, const QString &message, const QStr
 	recursiveMutex.lock();
 
 	// Fall back to stderr when this method has been called recursively.
-	if (defaultLogger && nonRecursiveMutex.tryLock()) {
+	if (defaultLogger && nonRecursiveMutex.tryLock())
+	{
 		defaultLogger->log(type, message, file, function, line);
 		nonRecursiveMutex.unlock();
-	} else {
+	} else
+	{
 		fputs(qPrintable(message), stderr);
 		fflush(stderr);
 	}
 
 	// Abort the program after logging a fatal message
-	if (type == QtFatalMsg) {
+	if (type == QtFatalMsg)
+	{
 		abort();
 	}
 
 	recursiveMutex.unlock();
 }
 
-void Logger::msgHandler5(const QtMsgType type, const QMessageLogContext &context, const QString &message) {
-	(void)(context); // suppress "unused parameter" warning
+void Logger::msgHandler5(const QtMsgType type,
+	const QMessageLogContext &context, const QString &message)
+{
+	(void) (context); // suppress "unused parameter" warning
 	msgHandler(type, message, context.file, context.function, context.line);
 }
 
-Logger::~Logger() {
-	if (defaultLogger == this) {
+Logger::~Logger()
+{
+	if (defaultLogger == this)
+	{
 		qInstallMessageHandler(nullptr);
 		defaultLogger = nullptr;
 	}
 }
 
-void Logger::write(const LogMessage *logMessage) {
+void Logger::write(const LogMessage *logMessage)
+{
 	fputs(qPrintable(logMessage->toString(msgFormat, timestampFormat)), stderr);
 	fflush(stderr);
 }
 
-void Logger::installMsgHandler() {
+void Logger::installMsgHandler()
+{
 	defaultLogger = this;
 	qInstallMessageHandler(msgHandler5);
 }
 
-void Logger::set(const QString &name, const QString &value) {
+void Logger::set(const QString &name, const QString &value)
+{
 	mutex.lock();
-	if (!logVars.hasLocalData()) {
+	if (!logVars.hasLocalData())
+	{
 		logVars.setLocalData(new QHash<QString, QString>);
 	}
 	logVars.localData()->insert(name, value);
 	mutex.unlock();
 }
 
-void Logger::clear(const bool buffer, const bool variables) {
+void Logger::clear(const bool buffer, const bool variables)
+{
 	mutex.lock();
-	if (buffer && buffers.hasLocalData()) {
+	if (buffer && buffers.hasLocalData())
+	{
 		QList<LogMessage *> *buffer = buffers.localData();
-		while (buffer && !buffer->isEmpty()) {
+		while (buffer && !buffer->isEmpty())
+		{
 			LogMessage *logMessage = buffer->takeLast();
 			delete logMessage;
 		}
 	}
-	if (variables && logVars.hasLocalData()) {
+	if (variables && logVars.hasLocalData())
+	{
 		logVars.localData()->clear();
 	}
 	mutex.unlock();
 }
 
-void Logger::log(const QtMsgType type, const QString &message, const QString &file, const QString &function,
-                 const int line) {
+void Logger::log(const QtMsgType type, const QString &message,
+	const QString &file, const QString &function, const int line)
+{
 	// Check if the type of the message reached the configured minLevel in the order
 	// DEBUG, INFO, WARNING, CRITICAL, FATAL
 	// Since Qt 5.5: INFO messages are between DEBUG and WARNING
 	bool toPrint = false;
-	switch (type) {
+	switch (type)
+	{
 		case QtDebugMsg:
-			if (minLevel == QtDebugMsg) {
+			if (minLevel == QtDebugMsg)
+			{
 				toPrint = true;
 			}
 			break;
 
 		case QtInfoMsg:
-			if (minLevel == QtDebugMsg || minLevel == QtInfoMsg) {
+			if (minLevel == QtDebugMsg || minLevel == QtInfoMsg)
+			{
 				toPrint = true;
 			}
 			break;
 
 		case QtWarningMsg:
-			if (minLevel == QtDebugMsg || minLevel == QtInfoMsg || minLevel == QtWarningMsg) {
+			if (minLevel == QtDebugMsg || minLevel == QtInfoMsg ||
+				minLevel == QtWarningMsg)
+			{
 				toPrint = true;
 			}
 			break;
 
 		case QtCriticalMsg: // or QtSystemMsg which has the same int value
-			if (minLevel == QtDebugMsg || minLevel == QtInfoMsg || minLevel == QtWarningMsg || minLevel == QtCriticalMsg) {
+			if (minLevel == QtDebugMsg || minLevel == QtInfoMsg ||
+				minLevel == QtWarningMsg || minLevel == QtCriticalMsg)
+			{
 				toPrint = true;
 			}
 			break;
@@ -154,26 +184,32 @@ void Logger::log(const QtMsgType type, const QString &message, const QString &fi
 	mutex.lock();
 
 	// If the buffer is enabled, write the message into it
-	if (bufferSize > 0) {
+	if (bufferSize > 0)
+	{
 		// Create new thread local buffer, if necessary
-		if (!buffers.hasLocalData()) {
+		if (!buffers.hasLocalData())
+		{
 			buffers.setLocalData(new QList<LogMessage *>());
 		}
 		QList<LogMessage *> *buffer = buffers.localData();
 
 		// Append the decorated log message to the buffer
-		LogMessage *logMessage = new LogMessage(type, message, logVars.localData(), file, function, line);
+		LogMessage *logMessage = new LogMessage(
+			type, message, logVars.localData(), file, function, line);
 		buffer->append(logMessage);
 
 		// Delete oldest message if the buffer became too large
-		if (buffer->size() > bufferSize) {
+		if (buffer->size() > bufferSize)
+		{
 			delete buffer->takeFirst();
 		}
 
 		// Print the whole buffer if the type is high enough
-		if (toPrint) {
+		if (toPrint)
+		{
 			// Print the whole buffer content
-			while (!buffer->isEmpty()) {
+			while (!buffer->isEmpty())
+			{
 				LogMessage *logMessage = buffer->takeFirst();
 				write(logMessage);
 				delete logMessage;
@@ -182,9 +218,12 @@ void Logger::log(const QtMsgType type, const QString &message, const QString &fi
 	}
 
 	// Buffer is disabled, print the message if the type is high enough
-	else {
-		if (toPrint) {
-			LogMessage logMessage(type, message, logVars.localData(), file, function, line);
+	else
+	{
+		if (toPrint)
+		{
+			LogMessage logMessage(
+				type, message, logVars.localData(), file, function, line);
 			write(&logMessage);
 		}
 	}
