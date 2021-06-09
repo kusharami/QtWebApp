@@ -79,7 +79,7 @@ void HttpConnectionHandler::createSocket()
 
 void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 {
-	Q_ASSERT(!busy);
+	Q_ASSERT(busy);
 	Q_ASSERT(!reading);
 	Q_ASSERT(
 		socket->isOpen() == false); // if not, then the handler is already busy
@@ -92,7 +92,6 @@ void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 		static_cast<void *>(this));
 #endif
 	socket->abort();
-	busy = true;
 	if (!socket->setSocketDescriptor(socketDescriptor))
 	{
 		busy = false;
