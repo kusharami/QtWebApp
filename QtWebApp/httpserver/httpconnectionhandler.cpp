@@ -92,13 +92,14 @@ void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 		static_cast<void *>(this));
 #endif
 	socket->abort();
+	busy = true;
 	if (!socket->setSocketDescriptor(socketDescriptor))
 	{
+		busy = false;
 		qCritical("HttpConnectionHandler (%p): cannot initialize socket: %s",
 			static_cast<void *>(this), qPrintable(socket->errorString()));
 		return;
 	}
-	busy = true;
 
 #ifndef QT_NO_SSL
 	// Switch on encryption, if SSL is configured
@@ -112,8 +113,14 @@ void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 	}
 #endif
 
-	// Start timer for read timeout
-	readTimer.start(cfg.readTimeout);
+	if (socket->bytesAvailable())
+	{
+		read();
+	} else
+	{
+		// Start timer for read timeout
+		readTimer.start(cfg.readTimeout);
+	}
 }
 
 bool HttpConnectionHandler::isBusy()
