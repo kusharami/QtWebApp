@@ -89,7 +89,7 @@ void HttpListener::incomingConnection(qintptr socketDescriptor)
 		QTcpSocket *socket = new QTcpSocket(this);
 		socket->setSocketDescriptor(socketDescriptor);
 		connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
-		socket->write("HTTP/1.1 503 too many connections\r\nConnection: "
+		socket->write("HTTP/1.1 429 too many connections\r\nConnection: "
 					  "close\r\n\r\nToo many connections\r\n");
 		socket->disconnectFromHost();
 	}
