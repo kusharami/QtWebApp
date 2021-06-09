@@ -49,6 +49,10 @@ protected:
 	/** Destructor */
 	virtual ~HttpConnectionHandler();
 
+	void destroy();
+
+	friend class HttpConnectionHandlerPool;
+
 public:
 	/**
 	  Constructor.
@@ -66,8 +70,6 @@ public:
 	/** Mark this handler as busy */
 	void setBusy();
 
-	void destroy();
-
 private:
 	/** Configuration */
 	HttpServerConfig cfg;
@@ -75,7 +77,7 @@ private:
 	/** TCP socket of the current connection  */
 	QTcpSocket *socket;
 
-	/** The thread that processes events of this connection */ /** The thread that processes events of this connection */
+	/** The thread that processes events of this connection */
 	QThread *thread;
 
 	/** Time for read timeout detection */
