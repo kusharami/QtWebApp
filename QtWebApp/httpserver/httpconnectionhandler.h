@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "qtwebappglobal.h"
-#include "httpserverconfig.h"
 #include "httprequest.h"
 #include "httprequesthandler.h"
+#include "httpserverconfig.h"
+#include "qtwebappglobal.h"
 
 #include <QTcpSocket>
 #include <QThread>
@@ -20,13 +20,6 @@
 
 namespace qtwebapp
 {
-/** Alias type definition, for compatibility to different Qt versions */
-#if QT_VERSION >= 0x050000
-typedef qintptr tSocketDescriptor;
-#else
-typedef int tSocketDescriptor;
-#endif
-
 /** Alias for QSslConfiguration if OpenSSL is not supported */
 #ifdef QT_NO_SSL
 #define QSslConfiguration QObject
@@ -56,6 +49,10 @@ protected:
 	/** Destructor */
 	virtual ~HttpConnectionHandler();
 
+	void destroy();
+
+	friend class HttpConnectionHandlerPool;
+
 public:
 	/**
 	  Constructor.
@@ -73,8 +70,6 @@ public:
 	/** Mark this handler as busy */
 	void setBusy();
 
-	void destroy();
-
 private:
 	/** Configuration */
 	HttpServerConfig cfg;
@@ -82,7 +77,7 @@ private:
 	/** TCP socket of the current connection  */
 	QTcpSocket *socket;
 
-	/** The thread that processes events of this connection */ /** The thread that processes events of this connection */
+	/** The thread that processes events of this connection */
 	QThread *thread;
 
 	/** Time for read timeout detection */
@@ -110,7 +105,7 @@ public slots:
 	  Received from from the listener, when the handler shall start processing a new connection.
 	  @param socketDescriptor references the accepted connection.
 	*/
-	void handleConnection(const tSocketDescriptor socketDescriptor);
+	void handleConnection(qintptr socketDescriptor);
 
 private slots:
 
@@ -124,4 +119,4 @@ private slots:
 	void disconnected();
 };
 
-} // end of namespace
+} // namespace qtwebapp

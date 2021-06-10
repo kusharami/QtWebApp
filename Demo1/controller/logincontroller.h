@@ -3,26 +3,26 @@
   @author Stefan Frings
 */
 
-#ifndef FORMCONTROLLER_H
-#define FORMCONTROLLER_H
+#ifndef LOGINCONTROLLER_H
+#define LOGINCONTROLLER_H
 
 #include "httprequest.h"
 #include "httprequesthandler.h"
 #include "httpresponse.h"
 
 /**
-  This controller displays a HTML form and dumps the submitted input.
+  This controller demonstrates how to use HTTP basic login.
 */
 
-class FormController : public qtwebapp::HttpRequestHandler {
+class LoginController : public qtwebapp::HttpRequestHandler {
 	Q_OBJECT
-	Q_DISABLE_COPY(FormController)
+	Q_DISABLE_COPY(LoginController)
   public:
 	/** Constructor */
-	FormController();
+	LoginController();
 
 	/** Generates the response */
 	void service(qtwebapp::HttpRequest &request, qtwebapp::HttpResponse &response);
 };
 
-#endif // FORMCONTROLLER_H
+#endif // LOGINCONTROLLER_H

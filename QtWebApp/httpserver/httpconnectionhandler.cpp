@@ -4,6 +4,7 @@
 */
 
 #include "httpconnectionhandler.h"
+
 #include "httpresponse.h"
 
 using namespace qtwebapp;
@@ -59,7 +60,7 @@ HttpConnectionHandler::~HttpConnectionHandler()
 void HttpConnectionHandler::createSocket()
 {
 // If SSL is supported and configured, then create an instance of QSslSocket
-#ifndef QT_NO_OPENSSL
+#ifndef QT_NO_SSL
 	if (sslConfiguration)
 	{
 		QSslSocket *sslSocket = new QSslSocket();
@@ -76,42 +77,49 @@ void HttpConnectionHandler::createSocket()
 	socket = new QTcpSocket();
 }
 
-void HttpConnectionHandler::handleConnection(tSocketDescriptor socketDescriptor)
+void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 {
+	Q_ASSERT(busy);
+	Q_ASSERT(!reading);
+	Q_ASSERT(
+		socket->isOpen() == false); // if not, then the handler is already busy
+
+	// delete previous request
+	delete currentRequest;
+	currentRequest = nullptr;
 #ifdef CMAKE_DEBUG
 	qDebug("HttpConnectionHandler (%p): handle new connection",
 		static_cast<void *>(this));
 #endif
-	busy = true;
-	Q_ASSERT(
-		socket->isOpen() == false); // if not, then the handler is already busy
-
 	socket->abort();
-
 	if (!socket->setSocketDescriptor(socketDescriptor))
 	{
+		busy = false;
 		qCritical("HttpConnectionHandler (%p): cannot initialize socket: %s",
 			static_cast<void *>(this), qPrintable(socket->errorString()));
 		return;
 	}
 
-#ifndef QT_NO_OPENSSL
+#ifndef QT_NO_SSL
 	// Switch on encryption, if SSL is configured
 	if (sslConfiguration)
 	{
 #ifdef CMAKE_DEBUG
 		qDebug("HttpConnectionHandler (%p): Starting encryption",
 			static_cast<void *>(this));
-		(static_cast<QSslSocket *>(socket))->startServerEncryption();
 #endif
+		(static_cast<QSslSocket *>(socket))->startServerEncryption();
 	}
 #endif
 
-	// Start timer for read timeout
-	readTimer.start(cfg.readTimeout);
-	// delete previous request
-	delete currentRequest;
-	currentRequest = nullptr;
+	if (socket->bytesAvailable())
+	{
+		read();
+	} else
+	{
+		// Start timer for read timeout
+		readTimer.start(cfg.readTimeout);
+	}
 }
 
 bool HttpConnectionHandler::isBusy()
@@ -259,6 +267,7 @@ void HttpConnectionHandler::read()
 
 			if (!socket->isOpen())
 			{
+				busy = false;
 				disconnect = true;
 			} else
 			{
