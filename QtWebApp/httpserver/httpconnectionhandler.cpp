@@ -326,9 +326,9 @@ void HttpConnectionHandler::read()
 			currentRequest = nullptr;
 		}
 	}
+	reading = false;
 	if (!disconnect)
 	{
-		reading = false;
 		readTimer.start(cfg.readTimeout);
 	}
 }
