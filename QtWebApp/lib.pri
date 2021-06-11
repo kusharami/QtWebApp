@@ -10,7 +10,7 @@ CONFIG += c++11
 VER_MAJ = 1
 VER_MIN = 8
 VER_PAT = 3
-VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}ac1
+VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}ac2
  
 DEFINES += \
 	QTWEBAPP_MAJOR=$$VER_MAJ \
@@ -19,7 +19,9 @@ DEFINES += \
 	"QTWEBAPP_VERSION_STR=\"\\\"$$VERSION\\\"\""
 
 DISTFILES += doc/* mainpage.dox Doxyfile
-OTHER_FILES += ../readme.txt
+OTHER_FILES += \
+	../README.md \
+	../CHANGELOG.txt
 
 INCLUDEPATH += $PWD
 
