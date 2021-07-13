@@ -184,6 +184,11 @@ void HttpConnectionHandler::read()
 	// The loop adds support for HTTP pipelinig
 	while (socket->bytesAvailable())
 	{
+		if (thread->isInterruptionRequested())
+		{
+			shouldFinish = true;
+			break;
+		}
 #ifdef SUPERVERBOSE
 		qDebug("HttpConnectionHandler (%p): read input",
 			static_cast<void *>(this));
@@ -200,6 +205,11 @@ void HttpConnectionHandler::read()
 			currentRequest->getStatus() != HttpRequest::complete &&
 			currentRequest->getStatus() != HttpRequest::abort)
 		{
+			if (thread->isInterruptionRequested())
+			{
+				shouldFinish = true;
+				break;
+			}
 			currentRequest->readFromSocket(socket);
 		}
 
@@ -262,7 +272,7 @@ void HttpConnectionHandler::read()
 					static_cast<void *>(this));
 			}
 
-			if (!socket->isOpen())
+			if (!socket->isOpen() || thread->isInterruptionRequested())
 			{
 				shouldFinish = true;
 			} else
