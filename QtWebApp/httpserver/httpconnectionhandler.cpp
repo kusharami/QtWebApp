@@ -20,6 +20,7 @@ HttpConnectionHandler::HttpConnectionHandler(const HttpServerConfig &cfg,
 	this->sslConfiguration = sslConfiguration;
 	currentRequest = nullptr;
 	busy = false;
+	shouldFinish = false;
 	reading = false;
 
 	// execute signals in a new thread
@@ -36,9 +37,11 @@ HttpConnectionHandler::HttpConnectionHandler(const HttpServerConfig &cfg,
 	socket->moveToThread(thread);
 
 	// Connect signals
-	connect(socket, SIGNAL(readyRead()), SLOT(read()));
-	connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
-	connect(&readTimer, SIGNAL(timeout()), SLOT(readTimeout()));
+	connect(socket, &QTcpSocket::readyRead, this, &HttpConnectionHandler::read);
+	connect(socket, &QTcpSocket::disconnected, this,
+		&HttpConnectionHandler::disconnected);
+	connect(&readTimer, &QTimer::timeout, this,
+		&HttpConnectionHandler::readTimeout);
 	connect(thread, &QThread::finished, this, &QObject::deleteLater);
 
 #ifdef CMAKE_DEBUG
@@ -112,14 +115,9 @@ void HttpConnectionHandler::handleConnection(qintptr socketDescriptor)
 	}
 #endif
 
-	if (socket->bytesAvailable())
-	{
-		read();
-	} else
-	{
-		// Start timer for read timeout
-		readTimer.start(cfg.readTimeout);
-	}
+	shouldFinish = false;
+	// Start timer for read timeout
+	readTimer.start(cfg.readTimeout);
 }
 
 bool HttpConnectionHandler::isBusy()
@@ -165,7 +163,10 @@ void HttpConnectionHandler::disconnected()
 		"HttpConnectionHandler (%p): disconnected", static_cast<void *>(this));
 #endif
 	socket->close();
-	if (!reading)
+	if (reading)
+	{
+		shouldFinish = true;
+	} else
 	{
 		readTimer.stop();
 		busy = false;
@@ -180,10 +181,14 @@ void HttpConnectionHandler::read()
 	}
 	reading = true;
 	readTimer.stop();
-	bool disconnect = false;
 	// The loop adds support for HTTP pipelinig
 	while (socket->bytesAvailable())
 	{
+		if (thread->isInterruptionRequested())
+		{
+			shouldFinish = true;
+			break;
+		}
 #ifdef SUPERVERBOSE
 		qDebug("HttpConnectionHandler (%p): read input",
 			static_cast<void *>(this));
@@ -200,6 +205,11 @@ void HttpConnectionHandler::read()
 			currentRequest->getStatus() != HttpRequest::complete &&
 			currentRequest->getStatus() != HttpRequest::abort)
 		{
+			if (thread->isInterruptionRequested())
+			{
+				shouldFinish = true;
+				break;
+			}
 			currentRequest->readFromSocket(socket);
 		}
 
@@ -213,11 +223,8 @@ void HttpConnectionHandler::read()
 				while (socket->bytesToWrite())
 					socket->waitForBytesWritten();
 				socket->disconnectFromHost();
-			} else
-			{
-				busy = false;
 			}
-			disconnect = true;
+			shouldFinish = true;
 			delete currentRequest;
 			currentRequest = nullptr;
 			break;
@@ -265,10 +272,9 @@ void HttpConnectionHandler::read()
 					static_cast<void *>(this));
 			}
 
-			if (!socket->isOpen())
+			if (!socket->isOpen() || thread->isInterruptionRequested())
 			{
-				busy = false;
-				disconnect = true;
+				shouldFinish = true;
 			} else
 			{
 				// Finalize sending the response if not already done
@@ -319,7 +325,7 @@ void HttpConnectionHandler::read()
 					while (socket->bytesToWrite())
 						socket->waitForBytesWritten();
 					socket->disconnectFromHost();
-					disconnect = true;
+					shouldFinish = true;
 				}
 			}
 			delete currentRequest;
@@ -327,7 +333,10 @@ void HttpConnectionHandler::read()
 		}
 	}
 	reading = false;
-	if (!disconnect)
+	if (shouldFinish)
+	{
+		busy = false;
+	} else
 	{
 		readTimer.start(cfg.readTimeout);
 	}

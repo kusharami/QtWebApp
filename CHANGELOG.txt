@@ -1,6 +1,10 @@
 Dont forget to update the release number also in
 QtWebApp.pro and httpserver/httpglobal.cpp.
 
+1.8.3ac3
+05.08.2021
+- Fixed HttpConnectionHandler incoming connection always busy
+
 1.8.3ac2
 11.06.2021
 - Fixed HttpConnectionHandler hanged on reading
@@ -24,7 +28,7 @@ Fix threadId not printed in log file.
 
 1.8.1
 07.02.2021
-Add Cookie attribute "SameSite". 
+Add Cookie attribute "SameSite".
 SessionStore does now emit a signal when a session expires.
 
 1.8.0
