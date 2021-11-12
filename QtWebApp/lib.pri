@@ -11,7 +11,9 @@ VER_MAJ = 1
 VER_MIN = 8
 VER_PAT = 3
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}ac2
- 
+
+clang:QMAKE_CXXFLAGS += -Wno-deprecated-declarations
+
 DEFINES += \
 	QTWEBAPP_MAJOR=$$VER_MAJ \
 	QTWEBAPP_MINOR=$$VER_MIN \
