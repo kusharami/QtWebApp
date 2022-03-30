@@ -12,7 +12,12 @@ VER_MIN = 8
 VER_PAT = 3
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}ac2
 
-clang:QMAKE_CXXFLAGS += -Wno-deprecated-declarations
+!msvc:clang|gcc:QMAKE_CXXFLAGS_WARN_ON += \
+	-Wno-deprecated-declarations \
+	-Wno-unknown-warning-option \
+	-Wno-unknown-warning \
+	-Wno-unused-variable \
+	-Wno-unused-command-line-argument
 
 DEFINES += \
 	QTWEBAPP_MAJOR=$$VER_MAJ \
