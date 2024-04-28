@@ -143,6 +143,11 @@ void HttpConnectionHandler::destroy()
 void HttpConnectionHandler::readTimeout()
 {
 	Q_ASSERT(!reading);
+	if (!currentRequest)
+	{
+		readTimer.start(cfg.readTimeout);
+		return;
+	}
 	qDebug("HttpConnectionHandler (%p): read timeout occured",
 		static_cast<void *>(this));
 
