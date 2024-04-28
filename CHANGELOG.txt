@@ -1,6 +1,15 @@
 Dont forget to update the release number also in
 QtWebApp.pro and httpserver/httpglobal.cpp.
 
+1.8.3ac6
+28.04.2024
+- Fixed read timeout issue when there is no request
+
+1.8.3ac5
+23.01.2024
+- MacOS arm64 and universal (x86_64 + arm64) architecture support
+- Mingw32-x64 clang compiler support
+
 1.8.3ac3
 05.08.2021
 - Fixed HttpConnectionHandler incoming connection always busy
